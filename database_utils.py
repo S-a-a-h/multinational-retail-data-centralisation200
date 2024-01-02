@@ -10,10 +10,11 @@ class DatabaseConnector:
 
 
 #read the credentials from the return of read_db_creds and initialise and return an sqlalchemy database engine
-    def init_db_engine():
-        credentials = read_db_creds()
-
-
+    def init_db_engine(self, creds_path):
+        credentials = self.read_db_creds(creds_path)
+        db_url = f"postgresql://{credentials['RDS_USER']}:{credentials['RDS_PASSWORD']}@{credentials['RDS_HOST']}:{credentials['RDS_PORT']}/{credentials['RDS_DATABASE']}"
+        engine = create_engine(db_url)
+        return engine
 
 #Using the engine from init_db_engine create a method list_db_tables to list all the tables in the database so you know which tables you can extract data from.
     def list_db_tables():
