@@ -3,13 +3,9 @@ import yaml
 
 class DatabaseConnector:
 #Create a method read_db_creds this will read the credentials yaml file and return a dictionary of the credentials.
-    def read_db_creds(file_path):
-        with open(file_path, 'r') as file:
-            credentials = yaml.safe_load(file)
-        return credentials
-    
-        file_path = '/Users/itsanya/AiCore/MRDC/db_creds.yaml'
-        credentials = read_db_creds(file_path)
+    def read_db_creds(self, creds_path):
+        with open(creds_path, 'r') as creds:
+            credentials = yaml.safe_load(creds)
         return dict(credentials)
 
 
