@@ -2,13 +2,13 @@
 import yaml
 from sqlalchemy import create_engine, inspect
 
+
 class DatabaseConnector:
 #Create a method read_db_creds this will read the credentials yaml file and return a dictionary of the credentials.
     def read_db_creds(self, creds_path):
         with open(creds_path, 'r') as creds:
             credentials = yaml.safe_load(creds)
         return dict(credentials)
-
 
 #read the credentials from the return of read_db_creds and initialise and return an sqlalchemy database engine
     def init_db_engine(self, creds_path):
