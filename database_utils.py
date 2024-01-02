@@ -1,5 +1,6 @@
 #Connect with and upload data to the database
 import yaml
+from sqlalchemy import create_engine, inspect
 
 class DatabaseConnector:
 #Create a method read_db_creds this will read the credentials yaml file and return a dictionary of the credentials.
@@ -17,7 +18,11 @@ class DatabaseConnector:
         return engine
 
 #Using the engine from init_db_engine create a method list_db_tables to list all the tables in the database so you know which tables you can extract data from.
-    def list_db_tables():
-            
+    def list_db_tables(self, creds_path):
+        engine = self.init_db_engine(creds_path)
+        inspector = inspect(engine)
+        table_names = inspector.get_table_names()
+        return table_names
+        
 
 
