@@ -27,6 +27,15 @@ class DatabaseConnector:
         inspector = inspect(self.engine)
         table_names = inspector.get_table_names()
         return table_names
+
+#Method that will take in df and table_name to upload to as an argument
+    def upload_to_db(self, df, table_name):
+        try:
+            df.to_sql(table_name, self.engine, if_exists='replace', index=False)
+            print(f"Data successfully uploaded to '{table_name}' table.")
+        except Exception as e:
+            print(f"Error uploading data to '{table_name}' table: {str(e)}")
+
         
 
 
