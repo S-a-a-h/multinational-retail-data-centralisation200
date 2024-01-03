@@ -17,6 +17,5 @@ class DataCleaning:
 #Handling rows with wrong information: Identify outliers or incorrect entries and remove or correct them.
     def clean_user_data(self):
         
+        
 
-#This method will take in a Pandas DataFrame and table name to upload to as an argument.
-    def upload_to_db():
