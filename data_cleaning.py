@@ -1,8 +1,13 @@
 #Class with methods to clean data from each of the data sources
+import pandas as pd
+from database_utils import DatabaseConnector
+from data_extraction import DataExtractor
 
 class DataCleaning:
 #Initialize:
-    def __init__ ():
+    def __init__ (self, creds_path):
+        self.connector_instance = DatabaseConnector(creds_path)
+        self.extractor_instance = DataExtractor()
 
 #Clean the user data, look out for NULL values, errors with dates, incorrectly typed values and rows filled with the wrong information
 
