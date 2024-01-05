@@ -32,9 +32,9 @@ class DatabaseConnector:
     def upload_to_db(self, df, table_name):
         try:
             df.to_sql(table_name, self.engine, if_exists='replace', index=False)
-            print(f"Data successfully uploaded to '{table_name}' table.")
+            print(f"Data successfully uploaded to '{table_name}'.")
         except Exception as e:
-            print(f"Error uploading data to '{table_name}' table: {str(e)}")
+            print(f"Error uploading data to '{table_name}': {str(e)}")
 
         
 
