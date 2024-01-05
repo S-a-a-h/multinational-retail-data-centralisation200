@@ -2,6 +2,7 @@
 import pandas as pd
 from database_utils import DatabaseConnector
 from data_extraction import DataExtractor
+from data_transform import DataTransformer
 
 class DataCleaning:
 #Initialize:
@@ -16,6 +17,8 @@ class DataCleaning:
 #Correcting incorrectly typed values: Convert data types to the appropriate format (e.g., dates to datetime objects, strings to numeric values).
 #Handling rows with wrong information: Identify outliers or incorrect entries and remove or correct them.
     def clean_user_data(self):
-        
+        DataTransformer.convert_col_dtype(column="Name", type="str")
+        DataTransformer.clean_weights(column_name="weights")
+
         
 
