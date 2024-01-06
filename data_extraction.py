@@ -4,42 +4,13 @@ import pandas as pd
 from database_utils import DatabaseConnector
 
 class DataExtractor:
-#Initialize an instance via DatabaseConnector:
-    def __init__(self):
-        self.connector_instance = DatabaseConnector('/Users/itsanya/AiCore/MRDC/db_creds.yaml')
 
-#Take in an instance of your DatabaseConnector class and the table name as an argument and return a pandas DataFrame
-    def read_rds_table(self, table_name):
-        engine = self.connector_instance.engine
-        query = f"SELECT * FROM {table_name}"
-        df = pd.read_sql(query, engine)
-        return df
+    def __init__(self, database_connector):
+        self.database_connector = database_connector
     
-    def get_user_data_table(self, connector_instance):
-    # Obtain list of tables from DatabaseConnector instance
-        tables = connector_instance.list_db_tables()
-
-        user_data_table = None
-        for table in tables:
-            if 'users' in table.lower() or 'details' in table.lower() or 'tables' in table.lower():
-                user_data_table = table
-                break
-
-        if user_data_table:
-        # Extract table containing user data using read_rds_table method
-            return self.read_rds_table(connector_instance, user_data_table)
-        else:
-            return None 
+    def read_rds_table(self, table_name):
+        tables = self.database_connector.list_db_tables()
         
-    def read_and_display_table(self, table_name):
-        # Extract the DataFrame using read_rds_table method
-        data_table = self.read_rds_table(table_name)
-
-        # Display the DataFrame contents
-        print(f"Contents of '{table_name}' Table:")
-        print(data_table.head()) 
-
-
-
-
-
+        if table_name in tables:
+            engine = self.database_connector.engine
+            return pd.read_sql_table(table_name, con=engine)
