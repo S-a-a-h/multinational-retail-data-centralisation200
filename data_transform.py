@@ -8,4 +8,5 @@
 #If that relationship doesn't work then you know there's something wrong with the cleaning
 
 class DataTransformer:
+    #convert None, N/A and 0 values to NULL for py recognition 
     
