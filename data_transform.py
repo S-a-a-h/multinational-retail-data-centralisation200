@@ -14,7 +14,7 @@ class DataTransformer:
 
     #store_df - transforming and cleaning methods
     def clean_store_address():
-        store_address = store_details_df['address'].str.split('\n', expand=True) #removes \n and splits the address into sections
+        store_address = store_df['address'].str.split('\n', expand=True) #removes \n and splits the address into sections
         store_address.columns = ['street', 'city', 'postal_code', 'other_details']
         store_df = pd.concat([store_df, store_address], axis=1)
         store_df.drop(columns=['address'], inplace=True)
