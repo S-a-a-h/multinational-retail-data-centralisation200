@@ -1,5 +1,6 @@
 #Class with methods to clean data from each of the data sources
 import pandas as pd
+from data_transform import DataTransformer
 
 
 class DataCleaning:
@@ -17,6 +18,12 @@ class DataCleaning:
     @staticmethod
     def hello():
         print('hello world')
+
+    from data_transform import DataTransformer
+
+transform = DataTransformer()
+columns_to_process = ['latitude', 'staff_numbers', 'longitude']
+store_df = transform.convert_and_drop(store_df, columns_to_process)
 
     #def clean_users_data(legacy_users_df):
 
