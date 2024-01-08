@@ -1,6 +1,5 @@
 #Class with methods to clean data from each of the data sources
 import pandas as pd
-from data_transform import DataTransformer
 
 
 class DataCleaning:
