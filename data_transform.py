@@ -34,8 +34,7 @@ class DataTransformer:
         return store_df
 
     def clean_store_type(self, store_df):
-        type_to_remove = ['QP74AHEQT0', 'O0QJIRC943', 'NULL', '50IB01SFAZ', '0RSNUU3DF5', 'B4KVQB3P5Y', 'X0FE7E2EOG', 'NN04B3F6UQ']
-        store_df = store_df[~store_df['store_type'].isin(type_to_remove)]
+        store_df = store_df(store_df[~store_df['store_type'].isin(['Local', 'Super Store', 'Mall Kiosk', 'Outlet', 'Web Portal'])].index)
         return store_df
 
     def clean_store_country_code(self, store_df):
@@ -43,8 +42,7 @@ class DataTransformer:
         return store_df
 
     def clean_store_continent(self, store_df):
-        continent_to_remove = ['QMAVR5H3LD', 'LU3E036ZD9', 'NULL', '5586JCLARW', 'GFJQ2AAEQ8', 'SLQBD982C0', 'XQ953VS0FG', '1WZB1TE1HL']
-        store_df = store_df[~store_df['continent'].isin(continent_to_remove)]
+        store_df = store_df(store_df[~store_df['continent'].isin(['Europe', 'America', 'eeEurope', 'eeAmerica'])].index)
         store_df['continent'] = store_df['continent'].apply(lambda x: x[2:] if x.startswith('ee') else x)
         return store_df
     
