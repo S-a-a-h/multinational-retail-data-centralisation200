@@ -49,14 +49,14 @@ class DataProcessor:
             return df
 
 
-    #users_df - transforming and cleaning methods
+    #users_df - processing and cleaning methods
     def 
 
 
 
 
 
-    #orders_df - transforming and cleaning methods
+    #orders_df - processing and cleaning methods
     def 
 
 
