@@ -2,13 +2,9 @@ import pandas as pd
 import re
 
 
-class DataTransformer:
+class DataProcessor:
 
-    #store_df - transforming and cleaning methods
-    def drop_store_cols(self, store_df):
-        store_df = store_df.drop(['index', 'lat'], axis=1, inplace=True)
-        return store_df
-
+    #store_df - processing and cleaning methods
     def clean_store_odate(self, store_df):
         odate_to_remove = ['ZCXWWKF45G', '7AHXLXIUEF', 'NULL', '0OLAK2I6NS', 'A3PMVM800J', 'GMMB02LA9V', 'NULL', '13PIY8GD1H', 'NULL', '36IIMAQD58']
         store_df = store_df[~store_df['opening_date'].isin(odate_to_remove)]
@@ -23,7 +19,6 @@ class DataTransformer:
         return store_df
 
     def clean_store_locality(self, store_df):
-        store_df['locality'].unique()
         locality_to_remove = ['N/A',  '9IBH8Y4Z0S', '1T6B406CI8', 'NULL', '6LVWPU1G64', 'RX9TCP2RGB', 'CQMHKI78BX', 'RY6K0AUE7F', '3VHFDNP8ET']
         store_df = store_df[~store_df['locality'].isin(locality_to_remove)]
         return store_df
@@ -63,3 +58,25 @@ class DataTransformer:
 
     #orders_df - transforming and cleaning methods
     def 
+
+
+
+
+    #All dfs - remember to assign each df to the methods being used in turn inorder to process and update them         
+        #numeric columns method to convert dt then drop NaN values in the columns
+    @staticmethod
+    def convert_and_drop(df, column_names):
+        for column_name in column_names:
+            df[column_name] = pd.to_numeric(df[column_name], errors='coerce')
+            df.dropna(subset=[column_name], inplace=True) #drops NaN values
+            return df
+        
+        @staticmethod
+    def drop_duplicates(df):
+        cleaned_df = df.drop_duplicates()
+        return cleaned_df
+    
+        @staticmethod
+    def drop_df_cols(df, column_names):
+        clean_df = df.drop(columns=column_names, inplace=True)
+        return clean_df 
