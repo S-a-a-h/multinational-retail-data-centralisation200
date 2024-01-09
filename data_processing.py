@@ -62,8 +62,17 @@ class DataProcessor:
 
 
 
-    #All dfs - remember to assign each df to the methods being used in turn inorder to process and update them         
-        #numeric columns method to convert dt then drop NaN values in the columns
+    #All dfs - remember to assign each df to the methods being used in turn inorder to process and update them  
+    @staticmethod
+    def drop_rows_with_numeric(df, columns): 
+        pattern = re.compile(r'\d')
+        for col in columns:
+            df = df[~df[col].astype(str).str.contains(pattern, na=False)]
+        return df
+    #use this method to filter:(users_df, 'first_name', 'last_name')
+    #use this method to filter:(orders_df, 'first_name', 'last_name')
+
+    #numeric columns method to convert dt then drop NaN values in the columns
     @staticmethod
     def convert_and_drop(df, column_names):
         for column_name in column_names:
@@ -71,12 +80,18 @@ class DataProcessor:
             df.dropna(subset=[column_name], inplace=True) #drops NaN values
             return df
         
-        @staticmethod
+    @staticmethod
     def drop_duplicates(df):
         cleaned_df = df.drop_duplicates()
         return cleaned_df
     
-        @staticmethod
+    @staticmethod
     def drop_df_cols(df, column_names):
         clean_df = df.drop(columns=column_names, inplace=True)
         return clean_df 
+    #(store_df, 'lat')
+    #(orders_df, '1')
+    
+    @staticmethod
+    def fix_index(df, index_col):
+        df.set_index(index_col, inplace=True)
