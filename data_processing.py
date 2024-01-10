@@ -6,9 +6,19 @@ class DataProcessor:
 
     #store_df - processing and cleaning methods
     def clean_store_odate(self, store_df):
-        odate_to_remove = ['ZCXWWKF45G', '7AHXLXIUEF', 'NULL', '0OLAK2I6NS', 'A3PMVM800J', 'GMMB02LA9V', 'NULL', '13PIY8GD1H', 'NULL', '36IIMAQD58']
+        odate_to_remove = [ 'NULL', 'ZCXWWKF45G', '7AHXLXIUEF', '0OLAK2I6NS', 'A3PMVM800J', 'GMMB02LA9V', '13PIY8GD1H', '36IIMAQD58']
         store_df = store_df[~store_df['opening_date'].isin(odate_to_remove)]
         store_df['opening_dates'] = store_df['opening_dates'].apply(lambda x: pd.to_datetime(x, errors='coerce').strftime('%Y-%m-%d') if pd.notnull(pd.to_datetime(x, errors='coerce')) else x)
+        return store_df
+    
+    def clean_store_locality(self, store_df):
+        locality_to_remove = ['N/A',  'NULL', '9IBH8Y4Z0S', '1T6B406CI8', '6LVWPU1G64', 'RX9TCP2RGB', 'CQMHKI78BX', 'RY6K0AUE7F', '3VHFDNP8ET']
+        store_df = store_df[~store_df['locality'].isin(locality_to_remove)]
+        return store_df
+    
+    def clean_store_code(self, store_df):
+        codes_to_remove = ['NULL', 'NRQKZWJ9OZ', 'QIUU9SVP51', 'Y8J0Z2W8O9', 'ISEE8A57FE', 'T0R2CQBDUS', 'TUOKF5HAAQ', '9D4LK7X4LZ']
+        store_df = store_df[~store_df['store_code'].isin(codes_to_remove)]
         return store_df
 
     def clean_store_address(self, store_df):
@@ -16,16 +26,6 @@ class DataProcessor:
         store_address.columns = ['street', 'city', 'postal_code', 'other_details']
         store_df = pd.concat([store_df, store_address], axis=1)
         store_df.drop(columns=['address'], inplace=True)
-        return store_df
-
-    def clean_store_locality(self, store_df):
-        locality_to_remove = ['N/A',  '9IBH8Y4Z0S', '1T6B406CI8', 'NULL', '6LVWPU1G64', 'RX9TCP2RGB', 'CQMHKI78BX', 'RY6K0AUE7F', '3VHFDNP8ET']
-        store_df = store_df[~store_df['locality'].isin(locality_to_remove)]
-        return store_df
-    
-    def clean_store_code(self, store_df):
-        codes_to_remove = ['NRQKZWJ9OZ', 'QIUU9SVP51', 'NULL', 'Y8J0Z2W8O9', 'ISEE8A57FE', 'T0R2CQBDUS', 'NULL', 'TUOKF5HAAQ', 'NULL', '9D4LK7X4LZ']
-        store_df = store_df[~store_df['store_code'].isin(codes_to_remove)]
         return store_df
 
     def clean_store_type(self, store_df):
@@ -96,4 +96,26 @@ class DataProcessor:
     def fix_index(df, index_col):
         df.set_index(index_col, inplace=True)
     
+    @staticmethod
+    def remove_invalid_dates(df, column_names):
 
+
+    def clean_store_odate(self, store_df):
+        odate_to_remove = [ 'NULL', 'ZCXWWKF45G', '7AHXLXIUEF', '0OLAK2I6NS', 'A3PMVM800J', 'GMMB02LA9V', '13PIY8GD1H', '36IIMAQD58']
+        store_df = store_df[~store_df['opening_date'].isin(odate_to_remove)]
+        store_df['opening_dates'] = store_df['opening_dates'].apply(lambda x: pd.to_datetime(x, errors='coerce').strftime('%Y-%m-%d') if pd.notnull(pd.to_datetime(x, errors='coerce')) else x)
+        return store_df
+    #create static method to convert dates to datetime and drop all values which does not match the datetime format
+    
+
+
+    def clean_store_locality(self, store_df):
+        locality_to_remove = ['N/A',  'NULL', '9IBH8Y4Z0S', '1T6B406CI8', '6LVWPU1G64', 'RX9TCP2RGB', 'CQMHKI78BX', 'RY6K0AUE7F', '3VHFDNP8ET']
+        store_df = store_df[~store_df['locality'].isin(locality_to_remove)]
+        return store_df
+    
+    def clean_store_code(self, store_df):
+        codes_to_remove = ['NULL', 'NRQKZWJ9OZ', 'QIUU9SVP51', 'Y8J0Z2W8O9', 'ISEE8A57FE', 'T0R2CQBDUS', 'TUOKF5HAAQ', '9D4LK7X4LZ']
+        store_df = store_df[~store_df['store_code'].isin(codes_to_remove)]
+        return store_df
+        #create static method to drop all values which does not match the invlaid format (make a pattern) or is a NULL or N/A value
