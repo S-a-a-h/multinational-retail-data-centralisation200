@@ -24,7 +24,7 @@ class DataProcessor:
         return store_df
     
     def clean_store_code(self, store_df):
-        codes_to_remove = ['WEB-1388012W', 'NRQKZWJ9OZ', 'QIUU9SVP51', 'NULL', 'Y8J0Z2W8O9', 'ISEE8A57FE', 'T0R2CQBDUS', 'NULL', 'TUOKF5HAAQ', 'NULL', '9D4LK7X4LZ']
+        codes_to_remove = ['NRQKZWJ9OZ', 'QIUU9SVP51', 'NULL', 'Y8J0Z2W8O9', 'ISEE8A57FE', 'T0R2CQBDUS', 'NULL', 'TUOKF5HAAQ', 'NULL', '9D4LK7X4LZ']
         store_df = store_df[~store_df['store_code'].isin(codes_to_remove)]
         return store_df
 
@@ -40,13 +40,6 @@ class DataProcessor:
         store_df = store_df(store_df[~store_df['continent'].isin(['Europe', 'America', 'eeEurope', 'eeAmerica'])].index)
         store_df['continent'] = store_df['continent'].apply(lambda x: x[2:] if x.startswith('ee') else x)
         return store_df
-    
-    #numeric columns method to convert dt then drop NaN values in the columns
-    def convert_and_drop(self, df, column_names):
-        for column_name in column_names:
-            df[column_name] = pd.to_numeric(df[column_name], errors='coerce')
-            df.dropna(subset=[column_name], inplace=True) #drops NaN values
-            return df
 
 
     #users_df - processing and cleaning methods
@@ -72,26 +65,35 @@ class DataProcessor:
     #use this method to filter:(users_df, 'first_name', 'last_name')
     #use this method to filter:(orders_df, 'first_name', 'last_name')
 
+    @staticmethod
+    def clean_uuids(df, column_name):
+        uuid_pattern = re.compile(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$')
+        df[column_name] = df[column_name].apply(lambda x: x if uuid_pattern.match(str(x)) else None)
+        return df
+    #(users_df, 'user_uuid')
+    #(orders_df, 'user_uuid', 'date_uuid')
+
     #numeric columns method to convert dt then drop NaN values in the columns
     @staticmethod
     def convert_and_drop(df, column_names):
         for column_name in column_names:
             df[column_name] = pd.to_numeric(df[column_name], errors='coerce')
             df.dropna(subset=[column_name], inplace=True) #drops NaN values
-            return df
+        return df
         
     @staticmethod
     def drop_duplicates(df):
-        cleaned_df = df.drop_duplicates()
-        return cleaned_df
+        df = df.drop_duplicates()
+        return df
     
     @staticmethod
     def drop_df_cols(df, column_names):
-        clean_df = df.drop(columns=column_names, inplace=True)
-        return clean_df 
+        df = df.drop(columns=column_names, inplace=True)
     #(store_df, 'lat')
-    #(orders_df, '1')
+    #(orders_df, 'level_0', '1')
     
     @staticmethod
     def fix_index(df, index_col):
         df.set_index(index_col, inplace=True)
+    
+
