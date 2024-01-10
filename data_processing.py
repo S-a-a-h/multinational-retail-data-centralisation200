@@ -5,22 +5,6 @@ import re
 class DataProcessor:
 
     #store_df - processing and cleaning methods
-    def clean_store_odate(self, store_df):
-        odate_to_remove = [ 'NULL', 'ZCXWWKF45G', '7AHXLXIUEF', '0OLAK2I6NS', 'A3PMVM800J', 'GMMB02LA9V', '13PIY8GD1H', '36IIMAQD58']
-        store_df = store_df[~store_df['opening_date'].isin(odate_to_remove)]
-        store_df['opening_dates'] = store_df['opening_dates'].apply(lambda x: pd.to_datetime(x, errors='coerce').strftime('%Y-%m-%d') if pd.notnull(pd.to_datetime(x, errors='coerce')) else x)
-        return store_df
-    
-    def clean_store_locality(self, store_df):
-        locality_to_remove = ['N/A',  'NULL', '9IBH8Y4Z0S', '1T6B406CI8', '6LVWPU1G64', 'RX9TCP2RGB', 'CQMHKI78BX', 'RY6K0AUE7F', '3VHFDNP8ET']
-        store_df = store_df[~store_df['locality'].isin(locality_to_remove)]
-        return store_df
-    
-    def clean_store_code(self, store_df):
-        codes_to_remove = ['NULL', 'NRQKZWJ9OZ', 'QIUU9SVP51', 'Y8J0Z2W8O9', 'ISEE8A57FE', 'T0R2CQBDUS', 'TUOKF5HAAQ', '9D4LK7X4LZ']
-        store_df = store_df[~store_df['store_code'].isin(codes_to_remove)]
-        return store_df
-
     def clean_store_address(self, store_df):
         store_address = store_df['address'].str.split('\n', expand=True) #removes \n and splits the address into sections
         store_address.columns = ['street', 'city', 'postal_code', 'other_details']
@@ -95,6 +79,9 @@ class DataProcessor:
     @staticmethod
     def fix_index(df, index_col):
         df.set_index(index_col, inplace=True)
+    
+
+
     
     @staticmethod
     def remove_invalid_dates(df, column_names):
