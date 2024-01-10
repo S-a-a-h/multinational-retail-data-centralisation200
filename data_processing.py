@@ -19,11 +19,6 @@ class DataProcessor:
         return store_df
 
     #users_df - processing and cleaning methods
-    def clean_users_company(self, users_df):
-        pattern = re.compile(r'[A-Z]+\d+')
-        users_df.drop(users_df[users_df['company'].astype(str).str.contains(pattern, na=False)].index, inplace=True)
-        return users_df
-
     def clean_users_email_address(self, users_df):
         users_df.drop(users_df[~users_df['email_address'].astype(str).str.contains('@', na=False)].index, inplace=True)
         return users_df
@@ -36,6 +31,11 @@ class DataProcessor:
         filter_cc = users_df[~users_df['country_code'].isin(['GB', 'US', 'DE', 'GGB'])].index
         users_df.loc[filter_cc, 'country_code'] = users_df.loc[filter_cc, 'country_code'].apply(lambda x: x[1:] if x == 'GGB' else x)
 
+    def clean_users_company(self, users_df):
+        pattern = re.compile(r'[A-Z]+\d+')
+        users_df.drop(users_df[users_df['company'].astype(str).str.contains(pattern, na=False)].index, inplace=True)
+        return users_df
+    
     #orders_df - processing and cleaning methods
     def 
 
