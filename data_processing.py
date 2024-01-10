@@ -136,4 +136,4 @@ class DataProcessor:
     #(users_df, 'index')
     #(orders_df, 'index')
         
-#all methods are static to avoid contantly having to creat instances for each df in order to use the methods from this class
+#all methods are static to avoid contantly having to create instances for each df in order to use the methods from this class
