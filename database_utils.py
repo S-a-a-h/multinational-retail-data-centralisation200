@@ -22,6 +22,11 @@ class DatabaseConnector:
     def list_db_tables(self):
         inspector = inspect(self.engine)
         table_names = inspector.get_table_names()
-        return table_names        
+        return table_names    
+
+    def upload_to_db(self, table_name, df, if_exists='replace', index=False):
+        df.to_sql(name=table_name, con=self.engine, index=index, if_exists=if_exists)
+        print(f"Data uploaded to '{table_name}' table successfully.")
+
 
 
