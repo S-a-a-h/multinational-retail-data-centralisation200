@@ -4,7 +4,7 @@ import pandas as pd
 class DataCleaning(DataProcessor):
     
     #STORE_DF
-    def clean_store_df(store_df):
+    def clean_store_df(self, store_df):
         cleaned_store_df = DataProcessor.clean_store_type(store_df)
         cleaned_store_df = DataProcessor.clean_store_country_code(store_df)
         cleaned_store_df = DataProcessor.clean_store_continent(store_df)
@@ -18,7 +18,7 @@ class DataCleaning(DataProcessor):
         return cleaned_store_df
 
     #USERS_DF
-    def clean_users_df(users_df):
+    def clean_users_df(self, users_df):
         cleaned_users_df = DataProcessor.clean_users_email_address(users_df)
         cleaned_users_df = DataProcessor.clean_users_country(users_df)
         cleaned_users_df = DataProcessor.clean_users_country_code(users_df)
@@ -32,7 +32,7 @@ class DataCleaning(DataProcessor):
         return cleaned_users_df
 
     #ORDERS_DF
-    def clean_orders_df(orders_df):
+    def clean_orders_df(self, orders_df):
         cleaned_orders_df = DataProcessor.clean_orders_store_code(orders_df)
         cleaned_orders_df = DataProcessor.convert_and_drop_non_numeric(orders_df, ['product_quantity'])
         cleaned_orders_df = DataProcessor.clean_fnames_lnames(orders_df)
