@@ -3,8 +3,7 @@ import re
 
 
 class DataProcessor:
-
-    #store_df - processing and cleaning methods
+    #STORE_DF
     def clean_store_type(self, store_df):
         store_df = store_df(store_df[~store_df['store_type'].isin(['Local', 'Super Store', 'Mall Kiosk', 'Outlet', 'Web Portal'])].index)
         return store_df
@@ -18,7 +17,8 @@ class DataProcessor:
         store_df['continent'] = store_df['continent'].apply(lambda x: x[2:] if x.startswith('ee') else x)
         return store_df
 
-    #users_df - processing and cleaning methods
+
+    #USERS_DF
     def clean_users_email_address(self, users_df):
         users_df.drop(users_df[~users_df['email_address'].astype(str).str.contains('@', na=False)].index, inplace=True)
         return users_df
@@ -36,20 +36,15 @@ class DataProcessor:
         users_df.drop(users_df[users_df['company'].astype(str).str.contains(pattern, na=False)].index, inplace=True)
         return users_df
     
-    #orders_df - processing and cleaning methods
-    def 
+
+    #ORDERS_DF
+    def clean_orders_store_code(self, order_df):
+        pattern = r'^[A-Z0-9]{2}-[A-Z0-9]+$' 
+        order_df = order_df[order_df['store_code'].str.match(pattern) | (order_df['store_code'] == 'WEB-1388012W')]
+        return order_df
 
 
-
-
-    #All dfs - remember to assign each df to the methods being used in turn inorder to process and update them  
-        
-    #method to drop duplicates in a df
-    @staticmethod
-    def drop_duplicates(df):
-        df = df.drop_duplicates()
-        return df
-    
+    #STATICMETHODS 
     @staticmethod
     def remove_invalid_values(df, column_names):
         pattern = re.compile(r'^[A-Za-z0-9]{10}$')
@@ -67,6 +62,7 @@ class DataProcessor:
             df.dropna(subset=[column_name], inplace=True) #drops NaN values
         return df
     #(store_df, ['latitude', 'staff_numbers', 'longitude'])
+    #(orders_df, ['product_quantity'])
 
     @staticmethod
     def clean_address(df, column_name):
@@ -79,10 +75,10 @@ class DataProcessor:
     #(users_df, 'address')  
 
     @staticmethod
-    def drop_rows_with_numeric(df, column_names): 
-        pattern = re.compile(r'\d')
+    def drop_invalid_names(df, column_names):
         for col in column_names:
-            df = df[~df[col].astype(str).str.contains(pattern, na=False)]
+            pattern = re.compile(r'^[A-Z0-9]+$')
+            df = df[~((df[col].astype(str).str.match(pattern, na=False)) | (df[col].isnull()))]
         return df
     #(users_df, ['first_name', 'last_name'])
     #(orders_df, ['first_name', 'last_name'])
@@ -124,8 +120,14 @@ class DataProcessor:
     #(users_df)
     #(order_df)
 
-
-
+    #method to drop duplicates in df
+    @staticmethod
+    def drop_duplicates(df):
+        df = df.drop_duplicates()
+        return df
+    #(store_df)
+    #(users_df)
+    #(orders_df)
 
     #final method to correct index column
     @staticmethod
