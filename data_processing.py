@@ -41,7 +41,7 @@ class DataProcessor:
     @staticmethod
     def clean_users_country(users_df):
         valid_countries = ['Germany', 'United Kingdom', 'United States']
-        users_df['country'] = users_df['country'].where(users_df['country'].isin(valid_countries), None)
+        users_df.loc[~users_df['country'].isin(valid_countries), 'country'] = np.nan
         return users_df
     
     @staticmethod
@@ -125,7 +125,7 @@ class DataProcessor:
 
     @staticmethod
     def drop_null_values(df):
-        df.dropna(inplace=True)
+        df.dropna(how='all', inplace=True)
         return df
     #(store_df)
     #(users_df)
