@@ -6,18 +6,21 @@ class DataProcessor:
     #STORE_DF METHODS ONLY
     @staticmethod
     def clean_store_type(store_df):
-        store_df = store_df(store_df[~store_df['store_type'].isin(['Local', 'Super Store', 'Mall Kiosk', 'Outlet', 'Web Portal'])].index)
+        valid_store_types = ['Local', 'Super Store', 'Mall Kiosk', 'Outlet', 'Web Portal']
+        store_df['store_type'] = store_df['store_type'].where(store_df['store_type'].isin(valid_store_types), None)
         return store_df
     
     @staticmethod
     def clean_store_country_code(store_df):
-        store_df = store_df(store_df[~store_df['country_code'].isin(['GB', 'US', 'DE'])].index)
+        valid_country_codes = ['GB', 'US', 'DE']
+        store_df['country_code'] = store_df['country_code'].where(store_df['country_code'].isin(valid_country_codes), None)
         return store_df
 
     @staticmethod
     def clean_store_continent(store_df):
-        store_df = store_df(store_df[~store_df['continent'].isin(['Europe', 'America', 'eeEurope', 'eeAmerica'])].index)
-        store_df['continent'] = store_df['continent'].apply(lambda x: x[2:] if x.startswith('ee') else x)
+        continents_to_keep = ['Europe', 'America', 'eeEurope', 'eeAmerica']
+        store_df['continent'] = store_df['continent'].where(store_df['continent'].isin(continents_to_keep), None)
+        store_df['continent'] = store_df['continent'].apply(lambda x: x[2:] if x and x.startswith('ee') else x)
         return store_df
     
     @staticmethod
@@ -25,38 +28,41 @@ class DataProcessor:
         pattern = re.compile(r'^[A-Za-z0-9]{10}$')
         for column_name in column_names:
             if column_name in df.columns:
-                df = df[~(df[column_name].astype(str).str.match(pattern, na=False) | df[column_name].isnull())]
+                df[column_name] = df[column_name].where(df[column_name].astype(str).str.match(pattern, na=False), None)
         return df
     #(store_df, ['locality', 'store_code'])
 
     #USERS_DF METHODS ONLY
     @staticmethod
     def clean_users_email_address(users_df):
-        users_df.drop(users_df[~users_df['email_address'].astype(str).str.contains('@', na=False)].index, inplace=True)
+        users_df['email_address'] = users_df['email_address'].where(users_df['email_address'].astype(str).str.contains('@', na=False), None)
         return users_df
     
     @staticmethod
     def clean_users_country(users_df):
-        users_df = users_df(users_df[~users_df['country'].isin(['Germany', 'United Kingdom', 'United States'])].index)
+        valid_countries = ['Germany', 'United Kingdom', 'United States']
+        users_df['country'] = users_df['country'].where(users_df['country'].isin(valid_countries), None)
         return users_df
     
     @staticmethod
     def clean_users_country_code(users_df):
-        filter_cc = users_df[~users_df['country_code'].isin(['GB', 'US', 'DE', 'GGB'])].index
-        users_df.loc[filter_cc, 'country_code'] = users_df.loc[filter_cc, 'country_code'].apply(lambda x: x[1:] if x == 'GGB' else x)
+        valid_country_codes = ['GB', 'US', 'DE', 'GGB']
+        users_df['country_code'] = users_df['country_code'].apply(lambda x: x if x in valid_country_codes else None)
+        users_df['country_code'] = users_df['country_code'].apply(lambda x: x[1:] if x == 'GGB' else x)
+        return users_df
 
     @staticmethod
     def clean_users_company(users_df):
-        pattern = re.compile(r'[A-Z]+\d+')
-        users_df.drop(users_df[users_df['company'].astype(str).str.contains(pattern, na=False)].index, inplace=True)
+        pattern = re.compile(r'^[A-Za-z0-9]+$')
+        users_df['company'] = users_df['company'].where(~users_df['company'].astype(str).str.match(pattern, na=False), None)
         return users_df
     
 
     #ORDERS_DF METHODS ONLY
     @staticmethod
     def clean_orders_store_code(order_df):
-        pattern = r'^[A-Z0-9]{2}-[A-Z0-9]+$' 
-        order_df = order_df[order_df['store_code'].str.match(pattern) | (order_df['store_code'] == 'WEB-1388012W')]
+        pattern = r'^[A-Z0-9]{2}-[A-Z0-9]+$'
+        order_df['store_code'] = order_df['store_code'].where(order_df['store_code'].str.match(pattern) | (order_df['store_code'] == 'WEB-1388012W'), None)
         return order_df
 
 
@@ -66,27 +72,25 @@ class DataProcessor:
     def convert_and_drop_non_numeric(df, column_names):
         for column_name in column_names:
             df[column_name] = pd.to_numeric(df[column_name], errors='coerce')
-            df.dropna(subset=[column_name], inplace=True) #drops NaN values
         return df
     #(store_df, ['latitude', 'staff_numbers', 'longitude'])
     #(orders_df, ['product_quantity'])
 
     @staticmethod
     def clean_address(df, column_name):
-        df[column_name] = df[column_name].str.replace('\n', '', regex=True)
-        df.dropna(subset=[column_name], inplace=True)
-        pattern = re.compile(r'^[A-Za-z0-9]{10}$')
-        df = df[~df[column_name].str.match(pattern, na=False)]
+        pattern = re.compile(r'^[A-Za-z0-9]+$')
+        df[column_name] = df[column_name].where(~df[column_name].str.match(pattern, na=False), None)
         return df
     #(store_df, 'address')
     #(users_df, 'address')  
     
     @staticmethod
     def clean_fnames_lnames(df):
-        pattern = re.compile(r'^[A-Z0-9]+$')
-        if 'first_name' in df.columns and 'last_name' in df.columns:
-            df = df.loc[~(df['first_name'].astype(str).str.contains(pattern, na=False) | df['first_name'].isnull() | df['first_name'].str.contains(r'\d'))]
-            df = df.loc[~(df['last_name'].astype(str).str.contains(pattern, na=False) | df['last_name'].isnull() | df['last_name'].str.contains(r'\d'))]
+        pattern = re.compile(r'^[A-Za-z0-9]+$')
+        if 'first_name' in df.columns:
+            df['first_name'] = df['first_name'].where(~df['first_name'].astype(str).str.contains(pattern, na=False) & ~df['first_name'].str.contains(r'\d'), None)
+        if 'last_name' in df.columns:
+            df['last_name'] = df['last_name'].where(~df['last_name'].astype(str).str.contains(pattern, na=False) & ~df['last_name'].str.contains(r'\d'), None)
         return df
     #(users_df)
     #(order_df)
@@ -103,7 +107,8 @@ class DataProcessor:
     
     @staticmethod
     def drop_df_cols(df, column_names):
-        df = df.drop(columns=column_names, inplace=True)
+        df.drop(columns=column_names, inplace=True)
+        return df
     #(store_df, ['lat'])
     #(orders_df, ['level_0', '1'])
     
@@ -113,11 +118,19 @@ class DataProcessor:
         for column_name in column_names:
             if column_name in df.columns:
                 df[column_name] = pd.to_datetime(df[column_name], errors='coerce')
-                df = df[df[column_name].notnull() & df[column_name].astype(str).str.match(date_pattern, na=False)]
+                df[column_name] = df[column_name].where(df[column_name].notnull() & df[column_name].astype(str).str.match(date_pattern, na=False), None)
         return df
     #(store_df, ['opening_date'])
     #(users_df, ['join_date', 'date_of_birth'])
 
+    @staticmethod
+    def drop_null_values(df):
+        df.dropna(inplace=True)
+        return df
+    #(store_df)
+    #(users_df)
+    #(orders_df)
+    
     #method to drop duplicates in df
     @staticmethod
     def drop_duplicates(df):
@@ -135,5 +148,5 @@ class DataProcessor:
     #(store_df, 'index')
     #(users_df, 'index')
     #(orders_df, 'index')
-        
+            
 #all methods are static to avoid contantly having to create instances for each df in order to use the methods from this class
