@@ -47,9 +47,13 @@ class DataProcessor:
     
     @staticmethod
     def clean_users_country_code(users_df):
-        valid_country_codes = ['GB', 'US', 'DE', 'GGB']
-        users_df['country_code'] = users_df['country_code'].apply(lambda x: x if x in valid_country_codes else None)
-        users_df['country_code'] = users_df['country_code'].apply(lambda x: x[1:] if x == 'GGB' else x)
+        valid_country_codes = ['GB', 'US', 'DE']
+        country_code_mapping = {'GGB': 'GB'}
+
+        def handle_GGB(c_code):
+            return country_code_mapping.get(c_code, None) if c_code in valid_country_codes else None
+        
+        users_df['country_code'] = users_df['country_code'].apply(handle_GGB)
         return users_df
 
     @staticmethod
@@ -72,7 +76,7 @@ class DataProcessor:
     @staticmethod
     def convert_and_drop_non_numeric(df, column_names):
         for column_name in column_names:
-            df[column_name] = pd.to_numeric(df[column_name], errors='coerce')
+            df[column_name] = pd.to_numeric(df[column_name], errors='coerce').where(df[column_name].notnull(), None)
         return df
     #(store_df, ['latitude', 'staff_numbers', 'longitude'])
     #(orders_df, ['product_quantity'])
@@ -80,7 +84,7 @@ class DataProcessor:
     @staticmethod
     def clean_address(df, column_name):
         pattern = re.compile(r'^[A-Za-z0-9]+$')
-        df[column_name] = df[column_name].where(~df[column_name].str.match(pattern, na=False), None)
+        df[column_name] = df[column_name].apply(lambda x: None if pd.notna(x) and pattern.match(str(x)) else x.replace('\n', ''))
         return df
     #(store_df, 'address')
     #(users_df, 'address')  
@@ -107,13 +111,6 @@ class DataProcessor:
     #(orders_df, ['user_uuid', 'date_uuid'])
     
     @staticmethod
-    def drop_df_cols(df, column_names):
-        df.drop(columns=column_names, inplace=True)
-        return df
-    #(store_df, ['lat'])
-    #(orders_df, ['level_0', '1'])
-    
-    @staticmethod
     def remove_invalid_dates(df, column_names):
         date_pattern = r'^\d{4}-\d{2}-\d{2}$'
         for column_name in column_names:
@@ -123,6 +120,13 @@ class DataProcessor:
         return df
     #(store_df, ['opening_date'])
     #(users_df, ['join_date', 'date_of_birth'])
+    
+    @staticmethod
+    def drop_df_cols(df, column_names):
+        df.drop(columns=column_names, inplace=True)
+        return df
+    #(store_df, ['lat'])
+    #(orders_df, ['level_0', '1'])
 
     @staticmethod
     def drop_null_values(df):
