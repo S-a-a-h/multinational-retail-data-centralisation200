@@ -120,17 +120,17 @@ class DataProcessor:
         return df
     #(store_df, ['opening_date'])
     #(users_df, ['join_date', 'date_of_birth'])
-    
+
     @staticmethod
     def drop_df_cols(df, column_names):
-        df.drop(columns=column_names, inplace=True)
+        df.drop(columns=column_names)
         return df
     #(store_df, ['lat'])
     #(orders_df, ['level_0', '1'])
 
     @staticmethod
     def drop_null_values(df):
-        df.dropna(how='all', inplace=True)
+        df.dropna(how='all')
         return df
     #(store_df)
     #(users_df)
@@ -148,8 +148,9 @@ class DataProcessor:
     #final method to correct index column
     @staticmethod
     def fix_index(df, index_col):
-        df.set_index(index_col, inplace=True)
+        df.set_index(index_col)
         df.index = df.index + 1 
+        return df
     #(store_df, 'index')
     #(users_df, 'index')
     #(orders_df, 'index')
