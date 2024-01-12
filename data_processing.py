@@ -73,16 +73,16 @@ class DataProcessor:
     #(store_df, 'address')
     #(users_df, 'address')  
 
-    @staticmethod
+    @staticmethod # - CLEANED (not over-engineered)
     def clean_uuids(df, column_names):
         uuid_pattern = re.compile(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$')
         for column_name in column_names:
             if column_name in df.columns:
-                df[column_name] = df[column_name].apply(lambda x: x if uuid_pattern.match(str(x)) else None)
+                df[column_name] = df[column_name].apply(lambda x: x if uuid_pattern.match(str(x)) else x)
         return df
-    #(users_df, ['user_uuid']) -THIS METHOD IS NOT USED AS CLEANING OCCURS VIA OTHER COLS
+    #(users_df, ['user_uuid'])
     #(orders_df, ['user_uuid', 'date_uuid'])
-    
+
     @staticmethod # - CLEANED (not over-engineered)
     def clean_dates(df, column_names):
         date_pattern = r'^\d{4}-\d{2}-\d{2}$'
