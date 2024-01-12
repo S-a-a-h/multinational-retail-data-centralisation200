@@ -44,7 +44,7 @@ class DataProcessor:
     def clean_users_country_code(users_df):
         valid_country_codes = ['GB', 'US', 'DE']
         country_code_mapping = {'GGB': 'GB'}
-        users_df['country_code'] = users_df['country_code'].apply(lambda c_c: country_code_mapping.get(c_c, c_c))
+        users_df.loc[:, 'country_code'] = users_df['country_code'].apply(lambda c_c: country_code_mapping.get(c_c, c_c))
         users_df = users_df[users_df['country_code'].isin(valid_country_codes)]
         return users_df
 
@@ -68,7 +68,7 @@ class DataProcessor:
 
     @staticmethod # - CLEANED (not over-engineered)
     def clean_address(df, column_name):
-        df[column_name] = df[column_name].apply(lambda x: str(x).replace('\n', '') if pd.notna(x) else x)
+        df[column_name] = df[column_name].apply(lambda x: str(x).replace('\n', ' ') if pd.notna(x) else x)
         return df
     #(store_df, 'address')
     #(users_df, 'address')  
