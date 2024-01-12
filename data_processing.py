@@ -80,7 +80,7 @@ class DataProcessor:
             if column_name in df.columns:
                 df[column_name] = df[column_name].apply(lambda x: x if uuid_pattern.match(str(x)) else None)
         return df
-    #(users_df, ['user_uuid'])
+    #(users_df, ['user_uuid']) -THIS METHOD IS NOT USED AS CLEANING OCCURS VIA OTHER COLS
     #(orders_df, ['user_uuid', 'date_uuid'])
     
     @staticmethod # - CLEANED (not over-engineered)
