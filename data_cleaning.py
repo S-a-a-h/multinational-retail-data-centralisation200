@@ -21,12 +21,13 @@ class DataCleaning(DataProcessor):
 
     #USERS_DF
     def clean_users_df(users_df):
-        cleaned_users_df = DataProcessor.clean_users_country(users_df)
-        cleaned_users_df = DataProcessor.clean_users_country_code(cleaned_users_df)
-        cleaned_users_df = DataProcessor.clean_address(cleaned_users_df, 'address')
-        cleaned_users_df = DataProcessor.clean_dates(cleaned_users_df, ['join_date', 'date_of_birth'])
-        cleaned_users_df = DataProcessor.drop_duplicates(cleaned_users_df)
-        cleaned_users_df = DataProcessor.fix_index(cleaned_users_df, 'index')
+        cleaned_users_df_dup = DataProcessor.drop_duplicates(users_df) #drops
+        cleaned_users_df_con = DataProcessor.clean_users_country(cleaned_users_df_dup) #filters only
+        cleaned_users_df_c_code = DataProcessor.clean_users_country_code(cleaned_users_df_con) #filters only
+        cleaned_users_df_address = DataProcessor.clean_address(cleaned_users_df_c_code, 'address') #filters only
+        cleaned_users_df_uuid = DataProcessor.clean_uuids(cleaned_users_df_address, ['user_uuid']) #drops
+        cleaned_users_df_dates = DataProcessor.clean_dates(cleaned_users_df_uuid, ['join_date', 'date_of_birth']) #drops
+        cleaned_users_df = DataProcessor.fix_index(cleaned_users_df_dates, 'index')
         return cleaned_users_df
 
     #ORDERS_DF
