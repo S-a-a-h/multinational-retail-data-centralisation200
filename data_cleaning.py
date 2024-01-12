@@ -1,8 +1,17 @@
 from data_processing import DataProcessor
-from IPython.display import display
-import pandas as pd
 
 class DataCleaning(DataProcessor):
+    
+    #USERS_DF
+    def clean_users_df(users_df):
+        cleaned_users_df_dup = DataProcessor.drop_duplicates(users_df) #drops
+        cleaned_users_df_con = DataProcessor.clean_users_country(cleaned_users_df_dup) #filters only
+        cleaned_users_df_c_code = DataProcessor.clean_users_country_code(cleaned_users_df_con) #filters only
+        cleaned_users_df_address = DataProcessor.clean_address(cleaned_users_df_c_code, 'address') #filters only
+        cleaned_users_df_uuid = DataProcessor.clean_uuids(cleaned_users_df_address, ['user_uuid']) #drops
+        cleaned_users_df_dates = DataProcessor.clean_dates(cleaned_users_df_uuid, ['join_date', 'date_of_birth']) #drops
+        cleaned_users_df = DataProcessor.fix_index(cleaned_users_df_dates, 'index')
+        return cleaned_users_df
     
     #STORE_DF
     def clean_store_df(self, store_df):
@@ -18,17 +27,6 @@ class DataCleaning(DataProcessor):
         cleaned_store_df = DataProcessor.drop_duplicates(cleaned_store_df)
         cleaned_store_df = DataProcessor.fix_index(cleaned_store_df, 'index')
         return cleaned_store_df
-
-    #USERS_DF
-    def clean_users_df(users_df):
-        cleaned_users_df_dup = DataProcessor.drop_duplicates(users_df) #drops
-        cleaned_users_df_con = DataProcessor.clean_users_country(cleaned_users_df_dup) #filters only
-        cleaned_users_df_c_code = DataProcessor.clean_users_country_code(cleaned_users_df_con) #filters only
-        cleaned_users_df_address = DataProcessor.clean_address(cleaned_users_df_c_code, 'address') #filters only
-        cleaned_users_df_uuid = DataProcessor.clean_uuids(cleaned_users_df_address, ['user_uuid']) #drops
-        cleaned_users_df_dates = DataProcessor.clean_dates(cleaned_users_df_uuid, ['join_date', 'date_of_birth']) #drops
-        cleaned_users_df = DataProcessor.fix_index(cleaned_users_df_dates, 'index')
-        return cleaned_users_df
 
     #ORDERS_DF
     def clean_orders_df(self, orders_df):
