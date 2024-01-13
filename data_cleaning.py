@@ -12,7 +12,7 @@ class DataCleaning(DataProcessor):
         cleaned_users_df_dates = DataProcessor.clean_dates(cleaned_users_df_uuid, ['join_date', 'date_of_birth']) #drops
         cleaned_users_df = DataProcessor.fix_index(cleaned_users_df_dates, 'index')
         return cleaned_users_df
-    
+
     #STORE_DF
     def clean_store_df(self, store_df):
         cleaned_store_df = DataProcessor.clean_store_type(store_df)
