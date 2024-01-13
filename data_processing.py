@@ -116,8 +116,8 @@ class DataProcessor:
     #final method to correct index column - CLEANED (not over-engineered)
     @staticmethod
     def fix_index(df, index_col):
-        df.set_index(index_col)
-        df.index = df.index + 1 
+        df.reset_index(drop=True, inplace=True)
+        df.loc[:, index_col] = range(1, len(df) + 1)
         return df
     #(store_df, 'index')
     #(users_df, 'index')
