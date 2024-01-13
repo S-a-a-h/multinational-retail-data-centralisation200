@@ -22,14 +22,14 @@ class DatabaseConnector:
     def list_db_tables(self):
         inspector = inspect(self.engine)
         table_names = inspector.get_table_names()
-        return table_names    
+        return table_names   
 
-    def upload_to_db(self, table_name, df, if_exists='replace', index=False):
-        df.to_sql(name=table_name, con=self.engine, index=index, if_exists=if_exists)
+    def upload_to_db(self, table_name, df, index=False, if_exists='replace'):
+        with open('/Users/itsanya/AiCore/MRDC/sales_data_creds.yaml', 'r') as ldbcreds:
+            ldb_creds = yaml.safe_load(ldbcreds)
+
+        ldb_connect = f"postgresql://{ldb_creds['username']}:{ldb_creds['password']}@{ldb_creds['host']}:{ldb_creds['port']}/{ldb_creds['database']}"
+        ldb_engine = create_engine(ldb_connect)
+
+        df.to_sql(name=table_name, con=ldb_engine, index=index, if_exists=if_exists)
         print(f"Data uploaded to '{table_name}' table successfully.")
-
-initialise the engine for this 
-- upload method initialise the engine there and pass that engine in df.tosql() instead of the one you are currently passing through
-- For this engine you want to use the file with the local credentials
-use it to upload
-
