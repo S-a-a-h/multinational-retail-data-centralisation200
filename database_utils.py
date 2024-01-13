@@ -24,7 +24,7 @@ class DatabaseConnector:
         table_names = inspector.get_table_names()
         return table_names   
 
-    def upload_to_db(self, table_name, df, index=False, if_exists='replace'):
+    def upload_to_db(self, df, table_name, index=False, if_exists='replace'):
         with open('/Users/itsanya/AiCore/MRDC/sales_data_creds.yaml', 'r') as ldbcreds:
             ldb_creds = yaml.safe_load(ldbcreds)
 
