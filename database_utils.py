@@ -28,5 +28,8 @@ class DatabaseConnector:
         df.to_sql(name=table_name, con=self.engine, index=index, if_exists=if_exists)
         print(f"Data uploaded to '{table_name}' table successfully.")
 
-
+initialise the engine for this 
+- upload method initialise the engine there and pass that engine in df.tosql() instead of the one you are currently passing through
+- For this engine you want to use the file with the local credentials
+use it to upload
 
