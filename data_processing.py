@@ -20,8 +20,8 @@ class DataProcessor:
         return users_df
     
     #CARD_DF METHODS ONLY
-    @staticmethod
-    def correct_card_prov(card_df): #NEED TO CHECK UNIQUE() FIRST!!! 
+    #@staticmethod
+    #def correct_card_prov(card_df): #NEED TO CHECK UNIQUE() FIRST!!! 
         
 
 
