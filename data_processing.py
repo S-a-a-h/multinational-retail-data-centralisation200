@@ -4,6 +4,27 @@ import re
 
 
 class DataProcessor:
+    #USERS_DF METHODS ONLY 
+    @staticmethod # - CLEANED (not over-engineered)
+    def clean_users_country(users_df):
+        valid_countries = ['Germany', 'United Kingdom', 'United States']
+        users_df = users_df[users_df['country'].isin(valid_countries)]
+        return users_df
+    
+    @staticmethod # - CLEANED (not over-engineered)
+    def clean_users_country_code(users_df):
+        valid_country_codes = ['GB', 'US', 'DE']
+        country_code_mapping = {'GGB': 'GB'}
+        users_df.loc[:, 'country_code'] = users_df['country_code'].apply(lambda c_c: country_code_mapping.get(c_c, c_c))
+        users_df = users_df[users_df['country_code'].isin(valid_country_codes)]
+        return users_df
+    
+    #CARD_DF METHODS ONLY
+    @staticmethod
+    def correct_card_prov(card_df):
+        
+
+
     #STORE_DF METHODS ONLY - fix these methods as they are currently over-engineered!
     @staticmethod
     def clean_store_type(store_df):
@@ -33,21 +54,6 @@ class DataProcessor:
         return df
     #(store_df, ['locality', 'store_code'])
 
-    #USERS_DF METHODS ONLY 
-    @staticmethod # - CLEANED (not over-engineered)
-    def clean_users_country(users_df):
-        valid_countries = ['Germany', 'United Kingdom', 'United States']
-        users_df = users_df[users_df['country'].isin(valid_countries)]
-        return users_df
-    
-    @staticmethod # - CLEANED (not over-engineered)
-    def clean_users_country_code(users_df):
-        valid_country_codes = ['GB', 'US', 'DE']
-        country_code_mapping = {'GGB': 'GB'}
-        users_df.loc[:, 'country_code'] = users_df['country_code'].apply(lambda c_c: country_code_mapping.get(c_c, c_c))
-        users_df = users_df[users_df['country_code'].isin(valid_country_codes)]
-        return users_df
-
     #ORDERS_DF METHODS ONLY - fix these methods as they are currently over-engineered!
     @staticmethod
     def clean_orders_store_code(order_df):
@@ -56,15 +62,16 @@ class DataProcessor:
         return order_df
 
 
-    #METHODS APPLICABLE TO MORE THAN 1 DF - fix these methods as they are currently over-engineered!
-    #method to convert dt to numeric then drop NaN values in those numeric columns
-    @staticmethod
-    def convert_and_drop_non_numeric(df, column_names):
+    #METHODS APPLICABLE TO MORE THAN 1 DF 
+    @staticmethod # - CLEANED (not over-engineered)
+    def tonumeric_and_drop_non_numeric(df, column_names):
         for column_name in column_names:
-            df[column_name] = pd.to_numeric(df[column_name], errors='coerce').where(df[column_name].notnull(), None)
+            df[column_name] = pd.to_numeric(df[column_name], errors='coerce')
+        df.dropna(subset=column_names, how='any', inplace=True)
         return df
     #(store_df, ['latitude', 'staff_numbers', 'longitude'])
     #(orders_df, ['product_quantity'])
+    #(card_df, ['expiry_date', 'date_payment_confirmed'])
 
     @staticmethod # - CLEANED (not over-engineered)
     def clean_address(df, column_name):
@@ -97,7 +104,7 @@ class DataProcessor:
     #(store_df, ['opening_date'])
     #(users_df, ['join_date', 'date_of_birth'])
 
-    @staticmethod
+    @staticmethod # - CLEANED (not over-engineered)
     def drop_df_cols(df, column_names):
         df.drop(columns=column_names)
         return df
@@ -105,7 +112,7 @@ class DataProcessor:
     #(orders_df, ['level_0', '1'])
     
     #method to drop duplicates in df
-    @staticmethod
+    @staticmethod # - CLEANED (not over-engineered)
     def drop_duplicates(df):
         df = df.drop_duplicates()
         return df
@@ -114,7 +121,7 @@ class DataProcessor:
     #(orders_df)
 
     #final method to correct index column - CLEANED (not over-engineered)
-    @staticmethod
+    @staticmethod # - CLEANED (not over-engineered)
     def fix_index(df, index_col):
         df.reset_index(drop=True, inplace=True)
         df.loc[:, index_col] = range(1, len(df) + 1)
