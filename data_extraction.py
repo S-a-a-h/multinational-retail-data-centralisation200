@@ -24,5 +24,8 @@ class DataExtractor:
             return df_list
         else:
             print(f"Failed to download the PDF. Status code: {response.status_code}")
+        
+    def list_number_of_stores():
+        
 
     

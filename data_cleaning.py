@@ -20,6 +20,14 @@ class DataCleaning(DataProcessor):
         cleaned_card_df_details = DataProcessor.tonumeric_and_drop_non_numeric(cleaned_card_df_dates) #card_details - .tonumeric() + certain length? (ADD AS PARAMETER IF SO!) > drop invalid rows
         cleaned_card_df = DataProcessor.drop_duplicates(cleaned_card_df_details) #drops
         return cleaned_card_df
+    
+    #BUSINESS STORE DF
+    def clean_store_data(self, b_store_df):
+        cleaned_b_store_df = DataProcessor.method(b_store_df)
+        cleaned_b_store_df = DataProcessor.method(cleaned_b_store_df)
+        cleaned_b_store_df = DataProcessor.method(cleaned_b_store_df) 
+        cleaned_b_store_df = DataProcessor.method(cleaned_b_store_df) 
+        return cleaned_b_store_df
 
     #STORE_DF
     def clean_store_df(self, store_df):
