@@ -12,6 +12,14 @@ class DataCleaning(DataProcessor):
         cleaned_users_df_dates = DataProcessor.clean_dates(cleaned_users_df_uuid, ['join_date', 'date_of_birth']) #drops
         cleaned_users_df = DataProcessor.fix_index(cleaned_users_df_dates, 'index')
         return cleaned_users_df
+    
+    #CARD_DF
+    def clean_card_data(self, card_df): # - MAKE METHODS AND REORDER
+        cleaned_card_df_prov = DataProcessor.correct_card_prov(card_df) #card_provider - MAY OR MAY NOT NEED THIS METHOD: check unique() > make corrections if necessary
+        cleaned_card_df_dates = DataProcessor.clean_dates(cleaned_card_df_prov, ['expiry_date', 'date_payment_confirmed']) # (card_df, ['expiry_date', 'date_payment_confirmed'])format date columns > drop invalid rows ('expiry_date', 'date_payment_confirmed')
+        cleaned_card_df_details = DataProcessor.tonumeric_and_drop_non_numeric(cleaned_card_df_dates) #card_details - .tonumeric() + certain length? (ADD AS PARAMETER IF SO!) > drop invalid rows
+        cleaned_card_df = DataProcessor.drop_duplicates(cleaned_card_df_details) #drops
+        return cleaned_card_df
 
     #STORE_DF
     def clean_store_df(self, store_df):
