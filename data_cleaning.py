@@ -14,12 +14,15 @@ class DataCleaning(DataProcessor):
         return cleaned_users_df
     
     #CARD_DF
-    def clean_card_data(self, card_df): # - MAKE METHODS AND REORDER
-        cleaned_card_df_prov = DataProcessor.correct_card_prov(card_df) #card_provider - MAY OR MAY NOT NEED THIS METHOD: check unique() > make corrections if necessary
-        cleaned_card_df_dates = DataProcessor.clean_dates(cleaned_card_df_prov, ['expiry_date', 'date_payment_confirmed']) # (card_df, ['expiry_date', 'date_payment_confirmed'])format date columns > drop invalid rows ('expiry_date', 'date_payment_confirmed')
-        cleaned_card_df_details = DataProcessor.tonumeric_and_drop_non_numeric(cleaned_card_df_dates) #card_details - .tonumeric() + certain length? (ADD AS PARAMETER IF SO!) > drop invalid rows
-        cleaned_card_df = DataProcessor.drop_duplicates(cleaned_card_df_details) #drops
+    def clean_card_data(self, card_df): # - REORDER
+        cleaned_card_df_dup = DataProcessor.drop_duplicates(card_df) #drops
+        cleaned_card_df_cprov = DataProcessor.card_prov(cleaned_card_df_dup) #filters only
+        cleaned_card_df_dropcols = DataProcessor.drop_df_cols(cleaned_card_df_cprov, ['card_number expiry_date', 'Unnamed: 0']) #drops
+        cleaned_card_df_pdates = DataProcessor.clean_dates(cleaned_card_df_dropcols, ['date_payment_confirmed']) #formats and drops
+        cleaned_card_df_edates = DataProcessor.clean_store_edate(cleaned_card_df_pdates, 'expiry_date') #formats and drops
+        cleaned_card_df = DataProcessor.clean_card_number(cleaned_card_df_edates, ['card_number']) #formats and drops
         return cleaned_card_df
+
     
     #BUSINESS STORE DF
     def clean_store_data(self, b_store_df):
@@ -28,6 +31,7 @@ class DataCleaning(DataProcessor):
         cleaned_b_store_df = DataProcessor.method(cleaned_b_store_df) 
         cleaned_b_store_df = DataProcessor.method(cleaned_b_store_df) 
         return cleaned_b_store_df
+
 
     #STORE_DF
     def clean_store_df(self, store_df):
