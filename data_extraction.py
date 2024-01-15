@@ -2,12 +2,13 @@ from database_utils import DatabaseConnector
 import pandas as pd
 import tabula
 import requests
-import json
+import boto3
 
 class DataExtractor:
     def __init__(self, db_connector_instance):
         self.db_connector_instance = db_connector_instance
-        self.header = None  #remeber to change header when using api-key
+        self.header = None  #change header when using api-key in main code execution
+        self.s3_client = boto3.client('s3')
 
 
     #USERS_DF
@@ -70,6 +71,13 @@ class DataExtractor:
         all_stores_df = pd.concat(store_dfs)
         return all_stores_df
 
+    #PRODS_DF
+    def extract_from_s3(self, s3_address):
+        bucket, key = s3_address.split("://")[1].split("/", 1)
+        response = self.s3_client.get_object(Bucket=bucket, Key=key)
+        data = pd.read_csv(response['Body'])
+        prods_df = pd.DataFrame(data)
+        return prods_df
 
 
 
