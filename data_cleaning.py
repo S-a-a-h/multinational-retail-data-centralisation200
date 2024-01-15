@@ -27,14 +27,26 @@ class DataCleaning(DataProcessor):
     #BUSINESS STORE DF (b_store_df)
     def clean_store_data(self, b_store_df): 
         cleaned_b_store_df_dup = DataProcessor.drop_duplicates(b_store_df)
-        cleaned_b_store_df_add = DataProcessor.clean_address(cleaned_b_store_df_dup, 'address')
-        cleaned_b_store_df_con = DataProcessor.clean_store_continent(cleaned_b_store_df_add) 
+        cleaned_b_store_df_con = DataProcessor.clean_store_continent(cleaned_b_store_df_dup) 
         cleaned_b_store_df_drop = DataProcessor.drop_df_cols(cleaned_b_store_df_con, ['lat'])
         cleaned_b_store_df_num = DataProcessor.tonumeric_and_drop_non_numeric(cleaned_b_store_df_drop, ['longitude', 'staff_numbers', 'latitude']) 
         cleaned_b_store_df_odate = DataProcessor.clean_dates(cleaned_b_store_df_num, ['opening_date']) 
         cleaned_b_store_df = DataProcessor.fix_index(cleaned_b_store_df_odate, 'index') 
         return cleaned_b_store_df
-
+    
+    #PRODUCTS DF (prods_df)
+    def convert_product_weights(self, prods_df):
+        prods_df = DataProcessor.process_prod_weight(prods_df)
+        return prods_df
+    
+    def clean_products_data(self, prods_df):
+        cleaned_prods_df_dup = DataProcessor.drop_duplicates(prods_df)
+        cleaned_prods_df_col_n = DataProcessor.clean_col_names(cleaned_prods_df_dup)
+        cleaned_prods_df_uuid = DataProcessor.clean_uuids(cleaned_prods_df_col_n, ['uuid']) 
+        cleaned_prods_df_ean = DataProcessor.convert_EAN_to_float(cleaned_prods_df_uuid)
+        cleaned_prods_df_date = DataProcessor.clean_dates(cleaned_prods_df_ean, ['date_added'])
+        cleaned_prods_df = DataProcessor.fix_index(cleaned_prods_df_date, 'index') 
+        return cleaned_prods_df
 
 
         
