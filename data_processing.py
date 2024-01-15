@@ -21,13 +21,13 @@ class DataProcessor:
     
 
     #CARD_DF METHODS ONLY
-    @staticmethod
+    @staticmethod # - CLEANED (not over-engineered)
     def card_prov(card_df):
         valid_card_provs = ['Diners Club / Carte Blanche', 'American Express', 'JCB 16 digit', 'JCB 15 digit', 'Maestro', 'Mastercard', 'Discover', 'VISA 19 digit', 'VISA 16 digit', 'VISA 13 digit']
         card_df = card_df[card_df['card_provider'].isin(valid_card_provs)]
         return card_df
 
-    @staticmethod
+    @staticmethod # - CLEANED (not over-engineered)
     def clean_store_edate(card_df, column_name):
         date_pattern = re.compile(r'^(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$')
         card_df = card_df.copy()
@@ -37,7 +37,7 @@ class DataProcessor:
         return card_df
     #(card_df, 'expiry_date')
 
-    @staticmethod
+    @staticmethod # - CLEANED (not over-engineered)
     def clean_card_number(card_df, column_name):
         card_df = card_df.copy()
         card_df[column_name] = card_df[column_name].apply(lambda x: x if str(x).isdigit() else x)
