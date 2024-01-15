@@ -36,47 +36,41 @@ class DataExtractor:
 
     def list_number_of_stores(self, number_of_stores_endpoint):
         response = requests.get(number_of_stores_endpoint, headers=self.header)
-        number_of_stores = response.json().get('count')
         if response.status_code == 200:
             number_of_stores = response.json().get('number_stores')
             print(f"Number of stores: {number_of_stores}")
-        return number_of_stores
-    
-    #def retrieve_stores_data(self, store_endpoint):
-    #    response = requests.get(store_endpoint, headers=self.header)
-    #    b_store_data = response.json().get('stores')
-    #    if b_store_data:
-    #        df = pd.DataFrame(b_store_data)
-    #        return df
+        return int(number_of_stores)
 
-            
+    def retrieve_stores_data(self, store_endpoint, number_of_stores):
+        store_dfs = []
 
-    def retrieve_stores_data(self, store_endpoint):
-        response = requests.get(store_endpoint, headers=self.header)
+        for store_number in range(number_of_stores):
+            endpoint = store_endpoint.format(store_number=store_number)
+            response = requests.get(endpoint, headers=self.header)
+            store_data = response.json()
 
-        try:
-            json_content = response.json()
+            extracted_data = {
+                'index': store_data.get('index'),
+                'address': store_data.get('address'),
+                'longitude': store_data.get('longitude'),
+                'lat': store_data.get('lat'),
+                'locality': store_data.get('locality'),
+                'store_code': store_data.get('store_code'),
+                'staff_numbers': store_data.get('staff_numbers'),
+                'opening_date': store_data.get('opening_date'),
+                'store_type': store_data.get('store_type'),
+                'latitude': store_data.get('latitude'),
+                'country_code': store_data.get('country_code'),
+                'continent': store_data.get('continent')
+            }
 
-            if isinstance(json_content, (dict, list)):
-                b_store_data = json_content.get('stores')
-                if b_store_data:
-                    df = pd.DataFrame(b_store_data)
-                    return df
-                else:
-                    print("No store data found.")
-                    return None
-            else:
-                #non-JSON content
-                print(f"Non-JSON content received: {json_content}")  #output - server issue? also had status 500 error with other code!
-                return None
-        except json.JSONDecodeError:
-            # Handle JSON decoding error
-            print(f"Error decoding JSON content.")
-            print(f"Raw content: {response.text}")  #Issue
-            print("Assuming non-JSON content. Handling it...")
+            store_df = pd.DataFrame(extracted_data, index=[store_data.get('index')])
+            store_dfs.append(store_df)
 
-            if "error" in response.text.lower():
-                print("Server returned an error message.")
+        all_stores_df = pd.concat(store_dfs)
+        return all_stores_df
 
-            return None
+
+
+
 
