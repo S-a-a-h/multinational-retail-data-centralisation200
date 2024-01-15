@@ -19,10 +19,30 @@ class DataProcessor:
         users_df = users_df[users_df['country_code'].isin(valid_country_codes)]
         return users_df
     
+
     #CARD_DF METHODS ONLY
-    #@staticmethod
-    #def correct_card_prov(card_df): #NEED TO CHECK UNIQUE() FIRST!!! 
-        
+    @staticmethod
+    def card_prov(card_df):
+        valid_card_provs = ['Diners Club / Carte Blanche', 'American Express', 'JCB 16 digit', 'JCB 15 digit', 'Maestro', 'Mastercard', 'Discover', 'VISA 19 digit', 'VISA 16 digit', 'VISA 13 digit']
+        card_df = card_df[card_df['card_provider'].isin(valid_card_provs)]
+        return card_df
+
+    @staticmethod
+    def clean_store_edate(card_df, column_name):
+        date_pattern = re.compile(r'^(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$')
+        card_df = card_df.copy()
+        if column_name in card_df.columns:
+            card_df[column_name] = card_df[column_name].astype(str).replace('/', '-', regex=True)
+            card_df = card_df.loc[card_df[column_name].apply(lambda x: bool(date_pattern.match(x)) if x is not None else False)]
+        return card_df
+    #(card_df, 'expiry_date')
+
+    @staticmethod
+    def clean_card_number(card_df, column_name):
+        card_df = card_df.copy()
+        card_df[column_name] = card_df[column_name].apply(lambda x: x if str(x).isdigit() else x)
+        return card_df
+    #(card_df, 'card_number')
 
 
     #STORE_DF METHODS ONLY - fix these methods as they are currently over-engineered!
@@ -62,7 +82,7 @@ class DataProcessor:
         return order_df
 
 
-    #METHODS APPLICABLE TO MORE THAN 1 DF 
+    #METHODS APPLICABLE TO MORE THAN 1 DF     
     @staticmethod # - CLEANED (not over-engineered)
     def tonumeric_and_drop_non_numeric(df, column_names):
         for column_name in column_names:
@@ -71,7 +91,6 @@ class DataProcessor:
         return df
     #(store_df, ['latitude', 'staff_numbers', 'longitude'])
     #(orders_df, ['product_quantity'])
-    #(card_df, ['expiry_date', 'date_payment_confirmed'])
 
     @staticmethod # - CLEANED (not over-engineered)
     def clean_address(df, column_name):
@@ -95,8 +114,8 @@ class DataProcessor:
         date_pattern = r'^\d{4}-\d{2}-\d{2}$'
         for column_name in column_names:
             if column_name in df.columns:
-                converted_dates = pd.to_datetime(df[column_name], errors='coerce')
-                df[column_name] = converted_dates
+                converted_dates = pd.to_datetime(df[column_name], errors='coerce', format='%Y-%m-%d')
+                df.loc[:, column_name] = converted_dates
                 non_conforming_mask = ~converted_dates.notnull() | ~converted_dates.astype(str).str.match(date_pattern, na=False)
                 df.loc[non_conforming_mask, column_name] = pd.NaT
         df = df.dropna(subset=column_names)
@@ -106,7 +125,7 @@ class DataProcessor:
 
     @staticmethod # - CLEANED (not over-engineered)
     def drop_df_cols(df, column_names):
-        df.drop(columns=column_names)
+        df.drop(columns=column_names, inplace=True)
         return df
     #(store_df, ['lat'])
     #(orders_df, ['level_0', '1'])
@@ -114,6 +133,7 @@ class DataProcessor:
     #method to drop duplicates in df
     @staticmethod # - CLEANED (not over-engineered)
     def drop_duplicates(df):
+        df = df.copy()
         df = df.drop_duplicates()
         return df
     #(store_df)
