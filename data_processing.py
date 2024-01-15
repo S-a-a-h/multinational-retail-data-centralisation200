@@ -59,7 +59,7 @@ class DataProcessor:
 
 
     #PRODS_DF METHODS ONLY
-    @staticmethod
+    @staticmethod # - CLEANED (not over-engineered)
     def process_prod_weight(prods_df):
         prods_df['weight'] = prods_df['weight'].astype(str).str.replace('kg', '')
         
@@ -73,15 +73,15 @@ class DataProcessor:
         prods_df['weight'] = prods_df['weight'].apply(convert_weight)
         return prods_df
     
-    @staticmethod
+    @staticmethod # - CLEANED (not over-engineered)
     def clean_col_names(prods_df):
         prods_df = prods_df.rename(columns={'Unnamed: 0': 'index'})
         prods_df = prods_df.rename(columns={'weight': 'weight(kg)'})
         prods_df = prods_df.rename(columns={'removed': 'product_status'})
         return prods_df
     
-    @staticmethod
-    def convert_EAN_to_float(prods_df):
+    @staticmethod # - CLEANED (not over-engineered)
+    def clean_EAN(prods_df):
         pattern = r'^\d+$'
         prods_df = prods_df[prods_df['EAN'].astype(str).str.match(pattern)]
         return prods_df
@@ -111,6 +111,7 @@ class DataProcessor:
                 df[column_name] = df[column_name].apply(lambda x: x if uuid_pattern.match(str(x)) else x)
         return df
     #(users_df, ['user_uuid'])
+    #(prods_df, ['uuid'])
 
     @staticmethod # - CLEANED (not over-engineered)
     def clean_dates(df, column_names):
@@ -126,6 +127,7 @@ class DataProcessor:
     #(users_df, ['join_date', 'date_of_birth'])
     #(card_df, ['date_payment_confirmed'])
     #(b_store_df, ['opening_date'])
+    #(prods_df, ['date_added'])
 
     @staticmethod # - CLEANED (not over-engineered)
     def drop_df_cols(df, column_names):
@@ -143,6 +145,7 @@ class DataProcessor:
     #(users_df)
     #(card_df)
     #(b_store_df)
+    #(prods_df)
 
     @staticmethod # - CLEANED (not over-engineered)
     def fix_index(df, index_col):
@@ -151,5 +154,6 @@ class DataProcessor:
         return df
     #(users_df, 'index')
     #(b_store_df, 'index')
+    #(prods_df, 'index')
             
 #all methods are static to avoid contantly having to create instances for each df in order to use the methods from this class
