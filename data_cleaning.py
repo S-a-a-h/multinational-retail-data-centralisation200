@@ -43,7 +43,7 @@ class DataCleaning(DataProcessor):
         cleaned_prods_df_dup = DataProcessor.drop_duplicates(prods_df)
         cleaned_prods_df_col_n = DataProcessor.clean_col_names(cleaned_prods_df_dup)
         cleaned_prods_df_uuid = DataProcessor.clean_uuids(cleaned_prods_df_col_n, ['uuid']) 
-        cleaned_prods_df_ean = DataProcessor.convert_EAN_to_float(cleaned_prods_df_uuid)
+        cleaned_prods_df_ean = DataProcessor.clean_EAN(cleaned_prods_df_uuid)
         cleaned_prods_df_date = DataProcessor.clean_dates(cleaned_prods_df_ean, ['date_added'])
         cleaned_prods_df = DataProcessor.fix_index(cleaned_prods_df_date, 'index') 
         return cleaned_prods_df
