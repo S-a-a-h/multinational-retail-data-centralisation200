@@ -66,22 +66,17 @@ class DataExtractor:
                     print("No store data found.")
                     return None
             else:
-                # Handle non-JSON content
+                #non-JSON content
                 print(f"Non-JSON content received: {json_content}")  #output - server issue? also had status 500 error with other code!
                 return None
         except json.JSONDecodeError:
             # Handle JSON decoding error
             print(f"Error decoding JSON content.")
-            print(f"Raw content: {response.text}")  # Print the raw content for debugging
-
-            # Assume it's non-JSON content and handle it accordingly
+            print(f"Raw content: {response.text}")  #Issue
             print("Assuming non-JSON content. Handling it...")
 
-            # Your additional handling logic for non-JSON content
             if "error" in response.text.lower():
                 print("Server returned an error message.")
-                # Additional handling based on the specific error format
-                # ...
 
             return None
 
