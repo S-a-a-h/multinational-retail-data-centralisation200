@@ -58,6 +58,35 @@ class DataProcessor:
     #(b_store_df)  
 
 
+    #PRODS_DF METHODS ONLY
+    @staticmethod
+    def process_prod_weight(prods_df):
+        prods_df['weight'] = prods_df['weight'].astype(str).str.replace('kg', '')
+        
+        def convert_weight(weight):
+            if 'g' in weight or 'ml' in weight:
+                numeric_value = pd.to_numeric(''.join(char for char in weight if char.isdigit() or char == '.'), errors='coerce') / 1000
+                return numeric_value if not pd.isna(numeric_value) else weight
+            else:
+                return pd.to_numeric(weight, errors='coerce')
+
+        prods_df['weight'] = prods_df['weight'].apply(convert_weight)
+        return prods_df
+    
+    @staticmethod
+    def clean_col_names(prods_df):
+        prods_df = prods_df.rename(columns={'Unnamed: 0': 'index'})
+        prods_df = prods_df.rename(columns={'weight': 'weight(kg)'})
+        prods_df = prods_df.rename(columns={'removed': 'product_status'})
+        return prods_df
+    
+    @staticmethod
+    def convert_EAN_to_float(prods_df):
+        pattern = r'^\d+$'
+        prods_df = prods_df[prods_df['EAN'].astype(str).str.match(pattern)]
+        return prods_df
+
+
     #METHODS APPLICABLE TO MORE THAN 1 DF     
     @staticmethod # - CLEANED (not over-engineered)
     def tonumeric_and_drop_non_numeric(df, column_names):
