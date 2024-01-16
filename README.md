@@ -38,7 +38,7 @@ Please note, the following instructions detail pgAdmin4 use only, as the primary
 
 1. Refresh your local databases by right-clicking on "Databases" in the left tab and selecting "Refresh"
 1. You should now be able to view sales_data in the left tab under Databases
-1. Select "sales_data" -> "Schemas" -> "Tables" to view the data tables
+1. Select "sales_data" -> "Schemas" -> "Public" -> "Tables" to view the data tables
 1. Run any necessary SQL commands on tables as per your team's task requirements
 
 
