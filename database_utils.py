@@ -1,4 +1,3 @@
-#Connect with and upload data to the database
 import yaml
 from sqlalchemy import create_engine, inspect
 
