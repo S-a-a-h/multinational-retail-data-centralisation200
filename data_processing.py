@@ -40,13 +40,6 @@ class DataProcessor:
         return card_df
     #(card_df)
 
-    @staticmethod # - CLEANED (not over-engineered)
-    def clean_card_number(card_df):
-        card_df = card_df.copy()
-        card_df['card_number'] = card_df['card_number'].apply(lambda x: x if str(x).isdigit() else x)
-        return card_df
-    #(card_df)
-
 
     #B_STORE_DF METHODS ONLY 
     @staticmethod # - CLEANED (not over-engineered)
@@ -87,7 +80,28 @@ class DataProcessor:
         return prods_df
 
 
-    #METHODS APPLICABLE TO MORE THAN 1 DF     
+    #SDT_DF METHODS ONLY
+    @staticmethod
+    def clean_timestamp(sdt_df):
+        sdt_df['timestamp'] = pd.to_datetime(sdt_df['timestamp'], errors='coerce')
+        sdt_df['timestamp'] = sdt_df['timestamp'].dt.strftime('%H:%M:%S')
+        return sdt_df
+
+    @staticmethod
+    def clean_time_period(sdt_df):
+        valid_periods = ['Evening', 'Morning', 'Midday', 'Late_Hours']
+        sdt_df = sdt_df[sdt_df['time_period'].isin(valid_periods)]
+        return sdt_df
+
+
+    #METHODS APPLICABLE TO MORE THAN 1 DF 
+    @staticmethod
+    def clean_card_number(df, column_name):
+        df[column_name] = df[column_name].apply(lambda x: x if str(x).isdigit() else x)
+        return df
+    #(card_df, 'card_number')
+    #(orders_df, 'card_number')
+        
     @staticmethod # - CLEANED (not over-engineered)
     def tonumeric_and_drop_non_numeric(df, column_names):
         for column_name in column_names:
@@ -95,6 +109,8 @@ class DataProcessor:
         df.dropna(subset=column_names, how='any', inplace=True)
         return df
     #(b_store_df, ['longitude', 'staff_numbers', 'latitude'])
+    #(orders_df 'product_quantity')
+    #(sdt_df, ['month', 'year', 'day'])
 
     @staticmethod # - CLEANED (not over-engineered)
     def clean_address(df, column_name):
@@ -112,6 +128,8 @@ class DataProcessor:
         return df
     #(users_df, ['user_uuid'])
     #(prods_df, ['uuid'])
+    #(orders_df, ['date_uuid', 'user_uuid'])
+    #(sdt_df, ['date_uuid'])
 
     @staticmethod # - CLEANED (not over-engineered)
     def clean_dates(df, column_names):
@@ -119,11 +137,11 @@ class DataProcessor:
         for column_name in column_names:
             if column_name in df.columns:
                 converted_dates = pd.to_datetime(df[column_name], errors='coerce', format='%Y-%m-%d')
-                df.loc[:, column_name] = converted_dates
+                df.loc[:, column_name] = converted_dates.dt.strftime('%Y-%m-%d')
                 non_conforming_mask = ~converted_dates.notnull() | ~converted_dates.astype(str).str.match(date_pattern, na=False)
                 df.loc[non_conforming_mask, column_name] = pd.NaT
         df = df.dropna(subset=column_names)
-        return df
+        return df    
     #(users_df, ['join_date', 'date_of_birth'])
     #(card_df, ['date_payment_confirmed'])
     #(b_store_df, ['opening_date'])
@@ -135,6 +153,7 @@ class DataProcessor:
         return df
     #(card_df, ['card_number expiry_date', 'Unnamed: 0'])
     #(b_store_df, ['lat'])
+    #(orders_df, ['level_0', 'first_name', 'last_name', '1'])
     
     #method to drop duplicates in df
     @staticmethod # - CLEANED (not over-engineered)
@@ -146,6 +165,8 @@ class DataProcessor:
     #(card_df)
     #(b_store_df)
     #(prods_df)
+    #(orders_df)
+    #(sdt_df)
 
     @staticmethod # - CLEANED (not over-engineered)
     def fix_index(df, index_col):
@@ -155,5 +176,6 @@ class DataProcessor:
     #(users_df, 'index')
     #(b_store_df, 'index')
     #(prods_df, 'index')
+    #(orders_df, 'index')
             
 #all methods are static to avoid contantly having to create instances for each df in order to use the methods from this class
