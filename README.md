@@ -16,10 +16,7 @@
    
 ### Project Description
 ---
-This project extracts data from various sources (SQL database, url links, via api-keys and s3 buckets) in differing formats (.pdf, .json, .csv)
-The extracted datas are compiled into individual pandas dataframes for processing and cleaning
-Finally, the cleaned pandas dataframes are uploaded to designated tables in a PostgreSQL database called sales_data
-All data will be connected via the orders_table in the sales_data database  
+This project extracts data from various sources (SQL database, url links, via api-keys and s3 buckets) in differing formats (.pdf, .json, .csv). The extracted datas are compiled into individual pandas dataframes for processing and cleaning. Finally, the cleaned pandas dataframes are uploaded to designated tables in a PostgreSQL database called sales_data. All data is connected via the orders_table in sales_data.   
 
 
 
