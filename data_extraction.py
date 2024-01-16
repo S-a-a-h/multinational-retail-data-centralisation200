@@ -1,14 +1,35 @@
 from database_utils import DatabaseConnector
-import pandas as pd
-import tabula
-import requests
 import boto3
 import json
+import pandas as pd
+import requests
+import tabula
+
 
 class DataExtractor:
+    
+    '''
+    DataExtractor Class
+    -------
+    This script extracts the raw data from their respective sources. 
+    The methods included are mostly public methods for code reusablity in further data extraction from varying sources.
+
+    Methods
+    -------
+        * __init__ - a magic method which uses an instance of class DatabaseConnecter and initializes it, applies the header attribute for api-key use and utilizes the aws cli
+        * read_rds_table - a public method to read in tables from a relational database using the engine created in class DatabaseConnector
+        * _retrieve_pdf_data - a private method which retrieves the card data from a pdf link and is coded to bypass an SSLCertification Error by instead downloading the file from the pdf_link and assigning a cacert.pem file to overcome the error. 
+        * set_api_key - a public method which alters the header attribute by assigning the api-keys
+        * list_number_of_stores - a public method that returns the number of stores as an interger
+        * retrieve_stores_data - a public method that retrieves the data, sorts it and returns a single pandas DataFrame
+        * extract_store_data - a public method that organizes the columns of the DataFrame returned by retrieve_stores_data
+        * extract_from_s3 - a public method that extracts data from an Amazon S3 Bucket via the bucket address
+        * extract_sdt - a public method that extracts data from an S3 Bucket using the link to the Amazon S3 Bucket
+    '''
+
     def __init__(self, db_connector_instance):
         self.db_connector_instance = db_connector_instance
-        self.header = None  #change header when using api-key in main code execution
+        self.header = None  #change header when using api-key in main code execution (main.ipynb)
         self.s3_client = boto3.client('s3')
 
 
@@ -21,7 +42,7 @@ class DataExtractor:
 
 
     #CARD_DF
-    def retrieve_pdf_data(self, pdf_link):
+    def _retrieve_pdf_data(self, pdf_link):
         custom_cert_path = '/Applications/IBM/SPSS/Statistics/24/Python3/lib/python3.4/site-packages/pip/_vendor/certifi/cacert.pem'
         response = requests.get(pdf_link, verify=custom_cert_path)
         if response.status_code == 200:
@@ -38,9 +59,8 @@ class DataExtractor:
 
     def list_number_of_stores(self, number_of_stores_endpoint):
         response = requests.get(number_of_stores_endpoint, headers=self.header)
-        if response.status_code == 200:
-            number_of_stores = response.json().get('number_stores')
-            print(f'Number of stores: {number_of_stores}')
+        number_of_stores = response.json().get('number_stores')
+        print(f'Number of stores: {number_of_stores}')
         return int(number_of_stores)
 
     def retrieve_stores_data(self, store_endpoint, number_of_stores):
@@ -51,26 +71,29 @@ class DataExtractor:
             response = requests.get(endpoint, headers=self.header)
             store_data = response.json()
 
-            extracted_data = {
-                'index': store_data.get('index'),
-                'address': store_data.get('address'),
-                'longitude': store_data.get('longitude'),
-                'lat': store_data.get('lat'),
-                'locality': store_data.get('locality'),
-                'store_code': store_data.get('store_code'),
-                'staff_numbers': store_data.get('staff_numbers'),
-                'opening_date': store_data.get('opening_date'),
-                'store_type': store_data.get('store_type'),
-                'latitude': store_data.get('latitude'),
-                'country_code': store_data.get('country_code'),
-                'continent': store_data.get('continent')
-            }
-
-            store_df = pd.DataFrame(extracted_data, index=[store_data.get('index')])
+            extracted_store_data = self.extract_store_data(store_data)
+            store_df = pd.DataFrame(extracted_store_data, index=[store_data.get('index')])
             store_dfs.append(store_df)
 
         all_stores_df = pd.concat(store_dfs)
         return all_stores_df
+    
+    def extract_store_data(self, store_data):
+        return {
+            'index': store_data.get('index'),
+            'address': store_data.get('address'),
+            'longitude': store_data.get('longitude'),
+            'lat': store_data.get('lat'),
+            'locality': store_data.get('locality'),
+            'store_code': store_data.get('store_code'),
+            'staff_numbers': store_data.get('staff_numbers'),
+            'opening_date': store_data.get('opening_date'),
+            'store_type': store_data.get('store_type'),
+            'latitude': store_data.get('latitude'),
+            'country_code': store_data.get('country_code'),
+            'continent': store_data.get('continent')
+        }
+
 
     #PRODS_DF
     def extract_from_s3(self, s3_address):
@@ -80,13 +103,12 @@ class DataExtractor:
         prods_df = pd.DataFrame(data)
         return prods_df
 
+
     #SDT_DF
     def extract_sdt(self, s3_url):
         response = requests.get(s3_url)
-        if response.status_code == 200:
-            sdt = json.loads(response.text)
-            print('File downloaded successfully.')
-            sdt_df = pd.DataFrame(sdt)
-            return sdt_df
+        sdt = json.loads(response.text)
+        sdt_df = pd.DataFrame(sdt)
+        return sdt_df
 
 
