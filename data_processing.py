@@ -22,17 +22,13 @@ class DataProcessor:
 
 
     #CARD_DF METHODS ONLY
-    def format_edate(edate):
-        try:
-            edate = pd.to_datetime(edate.replace('/', '-'), errors='raise').strftime('%m-%d')
-        except pd.errors.OutOfBoundsDatetime:
-            pass
-        return edate
-
     @staticmethod
-    def clean_store_edate(card_df):
+    def format_expiry_dates(card_df):
         if 'expiry_date' in card_df.columns:
-            card_df['expiry_date'] = card_df['expiry_date'].apply(DataProcessor.format_edate)
+            try:
+                card_df['expiry_date'] = pd.to_datetime(card_df['expiry_date'], format='%m-%d')
+            except ValueError:
+                card_df['expiry_date'] = card_df['expiry_date']  # Keep the original values in case of an error
         return card_df
 
 

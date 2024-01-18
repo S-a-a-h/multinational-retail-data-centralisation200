@@ -26,7 +26,7 @@ class DataCleaning(DataProcessor):
         cleaned_card_df_dup = DataProcessor.drop_duplicates(card_df) 
         cleaned_card_df_dropcols = DataProcessor.drop_df_cols(cleaned_card_df_dup, ['card_number expiry_date', 'Unnamed: 0']) 
         cleaned_card_df_pdates = DataProcessor.clean_dates(cleaned_card_df_dropcols, ['date_payment_confirmed']) 
-        cleaned_card_df_edates = DataProcessor.clean_store_edate(cleaned_card_df_pdates) 
+        cleaned_card_df_edates = DataProcessor.format_expiry_dates(cleaned_card_df_pdates) 
         cleaned_card_df = DataProcessor.clean_card_number(cleaned_card_df_edates, 'card_number') #PK
         return cleaned_card_df
     
@@ -50,7 +50,7 @@ class DataCleaning(DataProcessor):
     def clean_products_data(self, prods_df):
         cleaned_prods_df_dup = DataProcessor.drop_duplicates(prods_df) 
         cleaned_prods_df_col_n = DataProcessor.clean_col_names(cleaned_prods_df_dup) 
-        cleaned_prods_df_pc = DataProcessor.clean_prod_codes(cleaned_prods_df_col_n, ['product_code']) #PK
+        cleaned_prods_df_pc = DataProcessor.clean_prod_codes(cleaned_prods_df_col_n) #PK
         cleaned_prods_df_date = DataProcessor.clean_dates(cleaned_prods_df_pc, ['date_added']) 
         cleaned_prods_df = DataProcessor.fix_index(cleaned_prods_df_date, 'index') 
         return cleaned_prods_df
