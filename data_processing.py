@@ -19,30 +19,40 @@ class DataProcessor:
         users_df.loc[:, 'country_code'] = users_df['country_code'].apply(lambda c_c: country_code_mapping.get(c_c, c_c))
         users_df = users_df[users_df['country_code'].isin(valid_country_codes)]
         return users_df
-    
+
 
     #CARD_DF METHODS ONLY
+    def format_edate(edate):
+        try:
+            edate = pd.to_datetime(edate.replace('/', '-'), errors='raise').strftime('%m-%d')
+        except pd.errors.OutOfBoundsDatetime:
+            pass
+        return edate
+
     @staticmethod
     def clean_store_edate(card_df):
-        date_pattern = re.compile(r'^(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$')
-        card_df = card_df.copy()
         if 'expiry_date' in card_df.columns:
-            card_df['expiry_date'] = card_df['expiry_date'].astype(str).replace('/', '-', regex=True)
-            card_df = card_df.loc[card_df['expiry_date'].apply(lambda edate: bool(date_pattern.match(edate)) if edate is not None else False)]
+            card_df['expiry_date'] = card_df['expiry_date'].apply(DataProcessor.format_edate)
         return card_df
 
 
     #B_STORE_DF METHODS ONLY 
+    @staticmethod
+    def clean_store_code(b_store_df):
+        pattern = r'^[A-Z]{2}-\w{8}$|^WEB-1388012W$'
+        mask = b_store_df['store_code'].str.match(pattern, na=False)
+        b_store_df = b_store_df[mask]
+        return b_store_df
+
     @staticmethod
     def clean_store_continent(b_store_df):
         b_store_df['continent'] = b_store_df['continent'].apply(lambda con: con[2:] if con and con.startswith('ee') else con)
         return b_store_df
     
     @staticmethod
-    def tonumeric_and_drop_non_numeric(b_store_df, column_names):
+    def tonumeric(b_store_df, column_names):
         for column_name in column_names:
             b_store_df[column_name] = pd.to_numeric(b_store_df[column_name], errors='coerce')
-        b_store_df.dropna(subset=column_names, how='any', inplace=True)
         return b_store_df
 
 
@@ -70,7 +80,14 @@ class DataProcessor:
         prods_df = prods_df.rename(columns={'weight': 'weight(kg)'})
         prods_df = prods_df.rename(columns={'removed': 'product_status'})
         return prods_df
-
+    
+    @staticmethod
+    def clean_prod_codes(prods_df):
+        pattern = r'^[A-Z0-9]{2}-\d{7}[a-z]$'
+        mask = prods_df['product_code'].str.match(pattern, na=False)
+        prods_df = prods_df[mask]
+        return prods_df
+    
 
     #SDT_DF METHODS ONLY
     @staticmethod #does not drop rows!!!!!!!
@@ -82,6 +99,20 @@ class DataProcessor:
 
     #METHODS APPLICABLE TO MORE THAN 1 DF 
     @staticmethod
+    def clean_uuids(df, column_names):
+        uuid_pattern = re.compile(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$')
+        mask = df[column_names].apply(lambda col: col.astype(str).str.match(uuid_pattern, na=False)).all(axis=1)
+        df = df[mask]
+        return df
+
+    
+    @staticmethod
+    def clean_card_number(df, column_name):
+        df[column_name] = pd.to_numeric(df[column_name], errors='coerce')
+        df.dropna(subset=[column_name], inplace=True)
+        return df
+    
+    @staticmethod
     def clean_card_number(df, column_name):
         df[column_name] = df[column_name].apply(lambda card_num: card_num if str(card_num).isdigit() else card_num)
         return df
@@ -91,28 +122,10 @@ class DataProcessor:
         df[column_name] = df[column_name].apply(lambda address: str(address).replace('\n', ' ') if pd.notna(address) else address)
         return df  
 
-    @staticmethod 
-    def clean_uuids(df, column_names):
-        uuid_pattern = re.compile(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$')
-
-        for column_name in column_names:
-            if column_name in df.columns:
-                df[column_name] = df[column_name].apply(lambda uuid: uuid if uuid_pattern.match(str(uuid)) else uuid)
-
-        df = df[df[column_names].apply(lambda uuid: all(uuid_pattern.match(str(value)) for value in uuid), axis=1)]
-        return df
-
     @staticmethod
     def clean_dates(df, column_names):
-        date_pattern = r'^\d{4}-\d{2}-\d{2}$'
-        for column_name in column_names:
-            if column_name in df.columns:
-                converted_dates = pd.to_datetime(df[column_name], errors='coerce', format='%Y-%m-%d')
-                df.loc[:, column_name] = converted_dates.dt.strftime('%Y-%m-%d')
-                non_conforming_mask = ~converted_dates.notnull() | ~converted_dates.astype(str).str.match(date_pattern, na=False)
-                df.loc[non_conforming_mask, column_name] = pd.NaT
-        df = df.dropna(subset=column_names)
-        return df    
+        df[column_names] = df[column_names].apply(pd.to_datetime, errors='coerce')
+        return df
 
     @staticmethod
     def drop_df_cols(df, column_names):

@@ -15,8 +15,8 @@ class DataCleaning(DataProcessor):
     def clean_users_df(self, users_df):
         cleaned_users_df_dup = DataProcessor.drop_duplicates(users_df) 
         cleaned_users_df_c_code = DataProcessor.clean_users_country_code(cleaned_users_df_dup) 
-        cleaned_users_df_address = DataProcessor.clean_address(cleaned_users_df_c_code, 'address') 
-        cleaned_users_df_uuid = DataProcessor.clean_uuids(cleaned_users_df_address, ['user_uuid']) 
+        cleaned_users_df_add = DataProcessor.clean_address(cleaned_users_df_c_code, 'address') 
+        cleaned_users_df_uuid = DataProcessor.clean_uuids(cleaned_users_df_add, ['user_uuid']) #PK
         cleaned_users_df_dates = DataProcessor.clean_dates(cleaned_users_df_uuid, ['join_date', 'date_of_birth'])
         cleaned_users_df = DataProcessor.fix_index(cleaned_users_df_dates, 'index')
         return cleaned_users_df
@@ -27,15 +27,16 @@ class DataCleaning(DataProcessor):
         cleaned_card_df_dropcols = DataProcessor.drop_df_cols(cleaned_card_df_dup, ['card_number expiry_date', 'Unnamed: 0']) 
         cleaned_card_df_pdates = DataProcessor.clean_dates(cleaned_card_df_dropcols, ['date_payment_confirmed']) 
         cleaned_card_df_edates = DataProcessor.clean_store_edate(cleaned_card_df_pdates) 
-        cleaned_card_df = DataProcessor.clean_card_number(cleaned_card_df_edates, 'card_number') 
+        cleaned_card_df = DataProcessor.clean_card_number(cleaned_card_df_edates, 'card_number') #PK
         return cleaned_card_df
     
     #BUSINESS STORE DF (b_store_df)
     def clean_store_data(self, b_store_df): 
         cleaned_b_store_df_dup = DataProcessor.drop_duplicates(b_store_df) 
         cleaned_b_store_df_con = DataProcessor.clean_store_continent(cleaned_b_store_df_dup) 
-        cleaned_b_store_df_drop = DataProcessor.drop_df_cols(cleaned_b_store_df_con, ['lat']) 
-        cleaned_b_store_df_num = DataProcessor.tonumeric_and_drop_non_numeric(cleaned_b_store_df_drop, ['longitude', 'staff_numbers', 'latitude']) 
+        cleaned_b_store_df_s_c = DataProcessor.clean_store_code(cleaned_b_store_df_con) #PK
+        cleaned_b_store_df_drop = DataProcessor.drop_df_cols(cleaned_b_store_df_s_c, ['lat']) 
+        cleaned_b_store_df_num = DataProcessor.tonumeric(cleaned_b_store_df_drop, ['longitude', 'staff_numbers', 'latitude']) 
         cleaned_b_store_df_add = DataProcessor.clean_address(cleaned_b_store_df_num, 'address') 
         cleaned_b_store_df_odate = DataProcessor.clean_dates(cleaned_b_store_df_add, ['opening_date']) 
         cleaned_b_store_df = DataProcessor.fix_index(cleaned_b_store_df_odate, 'index') 
@@ -49,8 +50,8 @@ class DataCleaning(DataProcessor):
     def clean_products_data(self, prods_df):
         cleaned_prods_df_dup = DataProcessor.drop_duplicates(prods_df) 
         cleaned_prods_df_col_n = DataProcessor.clean_col_names(cleaned_prods_df_dup) 
-        cleaned_prods_df_uuid = DataProcessor.clean_uuids(cleaned_prods_df_col_n, ['uuid']) 
-        cleaned_prods_df_date = DataProcessor.clean_dates(cleaned_prods_df_uuid, ['date_added']) 
+        cleaned_prods_df_pc = DataProcessor.clean_prod_codes(cleaned_prods_df_col_n, ['product_code']) #PK
+        cleaned_prods_df_date = DataProcessor.clean_dates(cleaned_prods_df_pc, ['date_added']) 
         cleaned_prods_df = DataProcessor.fix_index(cleaned_prods_df_date, 'index') 
         return cleaned_prods_df
 
@@ -67,7 +68,7 @@ class DataCleaning(DataProcessor):
     def clean_sdt_df(self, sdt_df):
         cleaned_sdt_df_dup = DataProcessor.drop_duplicates(sdt_df) 
         cleaned_sdt_df_time = DataProcessor.clean_timestamp(cleaned_sdt_df_dup) 
-        cleaned_sdt_df = DataProcessor.clean_uuids(cleaned_sdt_df_time, ['date_uuid'])
+        cleaned_sdt_df = DataProcessor.clean_uuids(cleaned_sdt_df_time, ['date_uuid']) #PK
         return cleaned_sdt_df
         
 
