@@ -22,7 +22,7 @@ class DatabaseConnector:
         
     def __init__(self, creds_path):
         self.creds_path = creds_path
-        self.engine = self.init_db_engine()
+        self.engine = self._init_db_engine()
 
 
     def _read_db_creds(self):
@@ -32,7 +32,7 @@ class DatabaseConnector:
     
     
     def _init_db_engine(self):
-        credentials = self.read_db_creds()
+        credentials = self._read_db_creds()
         db_url = f"postgresql://{credentials['RDS_USER']}:{credentials['RDS_PASSWORD']}@{credentials['RDS_HOST']}:{credentials['RDS_PORT']}/{credentials['RDS_DATABASE']}"
         engine = create_engine(db_url)
         return engine    
@@ -53,6 +53,6 @@ class DatabaseConnector:
         return create_engine(ldb_connect)
 
     def _upload_to_db(self, df, table_name, index=False, if_exists='replace'):
-        ldb_engine = self.get_local_db_engine()
+        ldb_engine = self._get_local_db_engine()
         df.to_sql(name=table_name, con=ldb_engine, index=index, if_exists=if_exists)
         print(f"Data uploaded to '{table_name}' table successfully.")

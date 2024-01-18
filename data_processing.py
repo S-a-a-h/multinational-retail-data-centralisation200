@@ -12,12 +12,6 @@ class DataProcessor:
     '''
 
     #USERS_DF METHODS ONLY 
-    @staticmethod 
-    def clean_users_country(users_df):
-        valid_countries = ['Germany', 'United Kingdom', 'United States']
-        users_df = users_df[users_df['country'].isin(valid_countries)]
-        return users_df
-    
     @staticmethod
     def clean_users_country_code(users_df):
         valid_country_codes = ['GB', 'US', 'DE']
@@ -28,12 +22,6 @@ class DataProcessor:
     
 
     #CARD_DF METHODS ONLY
-    @staticmethod
-    def clean_card_prov(card_df):
-        valid_card_provs = ['Diners Club / Carte Blanche', 'American Express', 'JCB 16 digit', 'JCB 15 digit', 'Maestro', 'Mastercard', 'Discover', 'VISA 19 digit', 'VISA 16 digit', 'VISA 13 digit']
-        card_df = card_df[card_df['card_provider'].isin(valid_card_provs)]
-        return card_df
-
     @staticmethod
     def clean_store_edate(card_df):
         date_pattern = re.compile(r'^(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$')
@@ -47,9 +35,14 @@ class DataProcessor:
     #B_STORE_DF METHODS ONLY 
     @staticmethod
     def clean_store_continent(b_store_df):
-        continents_to_keep = ['Europe', 'America', 'eeEurope', 'eeAmerica']
-        b_store_df['continent'] = b_store_df['continent'].where(b_store_df['continent'].isin(continents_to_keep), None)
         b_store_df['continent'] = b_store_df['continent'].apply(lambda con: con[2:] if con and con.startswith('ee') else con)
+        return b_store_df
+    
+    @staticmethod
+    def tonumeric_and_drop_non_numeric(b_store_df, column_names):
+        for column_name in column_names:
+            b_store_df[column_name] = pd.to_numeric(b_store_df[column_name], errors='coerce')
+        b_store_df.dropna(subset=column_names, how='any', inplace=True)
         return b_store_df
 
 
@@ -77,25 +70,13 @@ class DataProcessor:
         prods_df = prods_df.rename(columns={'weight': 'weight(kg)'})
         prods_df = prods_df.rename(columns={'removed': 'product_status'})
         return prods_df
-    
-    @staticmethod
-    def clean_EAN(prods_df):
-        pattern = r'^\d+$'
-        prods_df = prods_df[prods_df['EAN'].astype(str).str.match(pattern)]
-        return prods_df
 
 
     #SDT_DF METHODS ONLY
-    @staticmethod
+    @staticmethod #does not drop rows!!!!!!!
     def clean_timestamp(sdt_df):
         sdt_df['timestamp'] = pd.to_datetime(sdt_df['timestamp'], errors='coerce')
         sdt_df['timestamp'] = sdt_df['timestamp'].dt.strftime('%H:%M:%S')
-        return sdt_df
-
-    @staticmethod
-    def clean_time_period(sdt_df):
-        valid_periods = ['Evening', 'Morning', 'Midday', 'Late_Hours']
-        sdt_df = sdt_df[sdt_df['time_period'].isin(valid_periods)]
         return sdt_df
 
 
@@ -103,13 +84,6 @@ class DataProcessor:
     @staticmethod
     def clean_card_number(df, column_name):
         df[column_name] = df[column_name].apply(lambda card_num: card_num if str(card_num).isdigit() else card_num)
-        return df
-        
-    @staticmethod
-    def tonumeric_and_drop_non_numeric(df, column_names):
-        for column_name in column_names:
-            df[column_name] = pd.to_numeric(df[column_name], errors='coerce')
-        df.dropna(subset=column_names, how='any', inplace=True)
         return df
 
     @staticmethod
@@ -120,9 +94,12 @@ class DataProcessor:
     @staticmethod 
     def clean_uuids(df, column_names):
         uuid_pattern = re.compile(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$')
+
         for column_name in column_names:
             if column_name in df.columns:
                 df[column_name] = df[column_name].apply(lambda uuid: uuid if uuid_pattern.match(str(uuid)) else uuid)
+
+        df = df[df[column_names].apply(lambda uuid: all(uuid_pattern.match(str(value)) for value in uuid), axis=1)]
         return df
 
     @staticmethod

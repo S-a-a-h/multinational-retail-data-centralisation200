@@ -5,7 +5,7 @@ class DataCleaning(DataProcessor):
     '''
     DataCleaning Class
     -------
-    This script transforms the data via the inherited class: DataProcessor.
+    This script cleans the data via the inherited class: DataProcessor.
     The methods included are all staticmethods for code reusablity on all DataFrames created in this project.
     All methods are named descriptively for readability and all variables are distinct for each DataFrame for debugging purposes.
 
@@ -14,8 +14,7 @@ class DataCleaning(DataProcessor):
     #USERS_DF (users_df)
     def clean_users_df(self, users_df):
         cleaned_users_df_dup = DataProcessor.drop_duplicates(users_df) 
-        cleaned_users_df_con = DataProcessor.clean_users_country(cleaned_users_df_dup) 
-        cleaned_users_df_c_code = DataProcessor.clean_users_country_code(cleaned_users_df_con) 
+        cleaned_users_df_c_code = DataProcessor.clean_users_country_code(cleaned_users_df_dup) 
         cleaned_users_df_address = DataProcessor.clean_address(cleaned_users_df_c_code, 'address') 
         cleaned_users_df_uuid = DataProcessor.clean_uuids(cleaned_users_df_address, ['user_uuid']) 
         cleaned_users_df_dates = DataProcessor.clean_dates(cleaned_users_df_uuid, ['join_date', 'date_of_birth'])
@@ -25,8 +24,7 @@ class DataCleaning(DataProcessor):
     #CARD_DF (card_df)
     def clean_card_data(self, card_df): 
         cleaned_card_df_dup = DataProcessor.drop_duplicates(card_df) 
-        cleaned_card_df_cprov = DataProcessor.clean_card_prov(cleaned_card_df_dup) 
-        cleaned_card_df_dropcols = DataProcessor.drop_df_cols(cleaned_card_df_cprov, ['card_number expiry_date', 'Unnamed: 0']) 
+        cleaned_card_df_dropcols = DataProcessor.drop_df_cols(cleaned_card_df_dup, ['card_number expiry_date', 'Unnamed: 0']) 
         cleaned_card_df_pdates = DataProcessor.clean_dates(cleaned_card_df_dropcols, ['date_payment_confirmed']) 
         cleaned_card_df_edates = DataProcessor.clean_store_edate(cleaned_card_df_pdates) 
         cleaned_card_df = DataProcessor.clean_card_number(cleaned_card_df_edates, 'card_number') 
@@ -52,8 +50,7 @@ class DataCleaning(DataProcessor):
         cleaned_prods_df_dup = DataProcessor.drop_duplicates(prods_df) 
         cleaned_prods_df_col_n = DataProcessor.clean_col_names(cleaned_prods_df_dup) 
         cleaned_prods_df_uuid = DataProcessor.clean_uuids(cleaned_prods_df_col_n, ['uuid']) 
-        cleaned_prods_df_ean = DataProcessor.clean_EAN(cleaned_prods_df_uuid) 
-        cleaned_prods_df_date = DataProcessor.clean_dates(cleaned_prods_df_ean, ['date_added']) 
+        cleaned_prods_df_date = DataProcessor.clean_dates(cleaned_prods_df_uuid, ['date_added']) 
         cleaned_prods_df = DataProcessor.fix_index(cleaned_prods_df_date, 'index') 
         return cleaned_prods_df
 
@@ -63,17 +60,14 @@ class DataCleaning(DataProcessor):
         cleaned_orders_df_drop_cols = DataProcessor.drop_df_cols(cleaned_orders_df_dup, ['level_0', 'first_name', 'last_name', '1']) 
         cleaned_orders_df_uuids = DataProcessor.clean_uuids(cleaned_orders_df_drop_cols, ['date_uuid', 'user_uuid']) 
         cleaned_orders_df_cnum = DataProcessor.clean_card_number(cleaned_orders_df_uuids, 'card_number') 
-        cleaned_orders_df_prodq = DataProcessor.tonumeric_and_drop_non_numeric(cleaned_orders_df_cnum, ['product_quantity']) 
-        cleaned_orders_df = DataProcessor.fix_index(cleaned_orders_df_prodq, 'index')
+        cleaned_orders_df = DataProcessor.fix_index(cleaned_orders_df_cnum, 'index')
         return cleaned_orders_df
 
     #SALES DATE TIMES (sdt_df)
     def clean_sdt_df(self, sdt_df):
         cleaned_sdt_df_dup = DataProcessor.drop_duplicates(sdt_df) 
-        cleaned_sdt_df_drop_tp = DataProcessor.clean_time_period(cleaned_sdt_df_dup) 
-        cleaned_sdt_df_time = DataProcessor.clean_timestamp(cleaned_sdt_df_drop_tp ) 
-        cleaned_sdt_df_uuid = DataProcessor.clean_uuids(cleaned_sdt_df_time, ['date_uuid']) 
-        cleaned_sdt_df = DataProcessor.tonumeric_and_drop_non_numeric(cleaned_sdt_df_uuid, ['month', 'year', 'day']) 
+        cleaned_sdt_df_time = DataProcessor.clean_timestamp(cleaned_sdt_df_dup) 
+        cleaned_sdt_df = DataProcessor.clean_uuids(cleaned_sdt_df_time, ['date_uuid'])
         return cleaned_sdt_df
         
 
