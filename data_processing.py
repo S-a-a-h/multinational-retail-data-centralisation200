@@ -100,17 +100,12 @@ class DataProcessor:
         mask = df[column_names].apply(lambda col: col.astype(str).str.match(uuid_pattern, na=False)).all(axis=1)
         df = df[mask]
         return df
-
     
     @staticmethod
     def clean_card_number(df, column_name):
+        df[column_name] = df[column_name].str.replace('?', '')
         df[column_name] = pd.to_numeric(df[column_name], errors='coerce')
-        df.dropna(subset=[column_name], inplace=True)
-        return df
-    
-    @staticmethod
-    def clean_card_number(df, column_name):
-        df[column_name] = df[column_name].apply(lambda card_num: card_num if str(card_num).isdigit() else card_num)
+        df = df.dropna()
         return df
 
     @staticmethod
