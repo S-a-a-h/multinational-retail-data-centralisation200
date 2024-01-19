@@ -50,7 +50,7 @@ class DataCleaning(DataProcessor):
     def clean_products_data(self, prods_df):
         cleaned_prods_df_dup = DataProcessor.drop_duplicates(prods_df) 
         cleaned_prods_df_col_n = DataProcessor.clean_col_names(cleaned_prods_df_dup) 
-        cleaned_prods_df_pc = DataProcessor.clean_prod_codes(cleaned_prods_df_col_n) #PK
+        cleaned_prods_df_pc = DataProcessor.clean_prod_code(cleaned_prods_df_col_n) #PK
         cleaned_prods_df_date = DataProcessor.clean_dates(cleaned_prods_df_pc, ['date_added']) 
         cleaned_prods_df = DataProcessor.fix_index(cleaned_prods_df_date, 'index') 
         return cleaned_prods_df
@@ -59,9 +59,11 @@ class DataCleaning(DataProcessor):
     def clean_orders_df(self, orders_df):
         cleaned_orders_df_dup = DataProcessor.drop_duplicates(orders_df) 
         cleaned_orders_df_drop_cols = DataProcessor.drop_df_cols(cleaned_orders_df_dup, ['level_0', 'first_name', 'last_name', '1']) 
-        cleaned_orders_df_uuids = DataProcessor.clean_uuids(cleaned_orders_df_drop_cols, ['date_uuid', 'user_uuid']) 
-        cleaned_orders_df_cnum = DataProcessor.clean_card_number(cleaned_orders_df_uuids) 
-        cleaned_orders_df = DataProcessor.fix_index(cleaned_orders_df_cnum, 'index')
+        cleaned_orders_df_uuids = DataProcessor.clean_uuids(cleaned_orders_df_drop_cols, ['date_uuid', 'user_uuid']) #FK
+        cleaned_orders_df_cnum = DataProcessor.clean_card_number(cleaned_orders_df_uuids) #FK
+        cleaned_orders_df_sc = DataProcessor.clean_store_code(cleaned_orders_df_cnum) #FK
+        cleaned_orders_df_pc = DataProcessor.clean_prod_code(cleaned_orders_df_sc) #FK
+        cleaned_orders_df = DataProcessor.fix_index(cleaned_orders_df_pc, 'index') #FK
         return cleaned_orders_df
 
     #SALES DATE TIMES (sdt_df)

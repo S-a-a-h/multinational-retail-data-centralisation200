@@ -34,13 +34,6 @@ class DataProcessor:
 
     #B_STORE_DF METHODS ONLY 
     @staticmethod
-    def clean_store_code(b_store_df):
-        pattern = r'^[A-Z]{2}-\w{8}$|^WEB-1388012W$'
-        mask = b_store_df['store_code'].str.match(pattern, na=False)
-        b_store_df = b_store_df[mask]
-        return b_store_df
-
-    @staticmethod
     def clean_store_continent(b_store_df):
         b_store_df['continent'] = b_store_df['continent'].apply(lambda con: con[2:] if con and con.startswith('ee') else con)
         return b_store_df
@@ -77,13 +70,6 @@ class DataProcessor:
         prods_df = prods_df.rename(columns={'removed': 'product_status'})
         return prods_df
     
-    @staticmethod
-    def clean_prod_codes(prods_df):
-        pattern = r'^[A-Z0-9]{2}-\d{7}[a-z]$'
-        mask = prods_df['product_code'].str.match(pattern, na=False)
-        prods_df = prods_df[mask]
-        return prods_df
-    
 
     #SDT_DF METHODS ONLY
     @staticmethod #does not drop rows!!!!!!!
@@ -108,6 +94,20 @@ class DataProcessor:
         df['card_number'] = pd.to_numeric(df['card_number'], errors='coerce')
         df = df.dropna()
         return df
+    
+    @staticmethod
+    def clean_store_code(b_store_df):
+        pattern = r'^[A-Z]{2}-\w{8}$|^WEB-1388012W$'
+        mask = b_store_df['store_code'].str.match(pattern, na=False)
+        b_store_df = b_store_df[mask]
+        return b_store_df
+    
+    @staticmethod
+    def clean_prod_code(prods_df):
+        pattern = r'^[A-Z0-9]{2}-\d{7}[a-z]$'
+        mask = prods_df['product_code'].str.match(pattern, na=False)
+        prods_df = prods_df[mask]
+        return prods_df
 
     @staticmethod
     def clean_address(df, column_name):
