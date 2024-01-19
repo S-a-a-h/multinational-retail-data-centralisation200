@@ -27,7 +27,7 @@ class DataCleaning(DataProcessor):
         cleaned_card_df_dropcols = DataProcessor.drop_df_cols(cleaned_card_df_dup, ['card_number expiry_date', 'Unnamed: 0']) 
         cleaned_card_df_pdates = DataProcessor.clean_dates(cleaned_card_df_dropcols, ['date_payment_confirmed']) 
         cleaned_card_df_edates = DataProcessor.format_expiry_dates(cleaned_card_df_pdates) 
-        cleaned_card_df = DataProcessor.clean_card_number(cleaned_card_df_edates, 'card_number') #PK
+        cleaned_card_df = DataProcessor.clean_card_number(cleaned_card_df_edates) #PK
         return cleaned_card_df
     
     #BUSINESS STORE DF (b_store_df)
@@ -60,7 +60,7 @@ class DataCleaning(DataProcessor):
         cleaned_orders_df_dup = DataProcessor.drop_duplicates(orders_df) 
         cleaned_orders_df_drop_cols = DataProcessor.drop_df_cols(cleaned_orders_df_dup, ['level_0', 'first_name', 'last_name', '1']) 
         cleaned_orders_df_uuids = DataProcessor.clean_uuids(cleaned_orders_df_drop_cols, ['date_uuid', 'user_uuid']) 
-        cleaned_orders_df_cnum = DataProcessor.clean_card_number(cleaned_orders_df_uuids, 'card_number') 
+        cleaned_orders_df_cnum = DataProcessor.clean_card_number(cleaned_orders_df_uuids) 
         cleaned_orders_df = DataProcessor.fix_index(cleaned_orders_df_cnum, 'index')
         return cleaned_orders_df
 

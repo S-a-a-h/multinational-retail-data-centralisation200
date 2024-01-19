@@ -28,7 +28,7 @@ class DataProcessor:
             try:
                 card_df['expiry_date'] = pd.to_datetime(card_df['expiry_date'], format='%m-%d')
             except ValueError:
-                card_df['expiry_date'] = card_df['expiry_date']  # Keep the original values in case of an error
+                card_df['expiry_date'] = card_df['expiry_date'] 
         return card_df
 
 
@@ -97,14 +97,15 @@ class DataProcessor:
     @staticmethod
     def clean_uuids(df, column_names):
         uuid_pattern = re.compile(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$')
-        mask = df[column_names].apply(lambda col: col.astype(str).str.match(uuid_pattern, na=False)).all(axis=1)
+        mask = df[column_names].apply(lambda uuid: uuid.astype(str).str.match(uuid_pattern, na=False)).all(axis=1)
         df = df[mask]
         return df
     
     @staticmethod
-    def clean_card_number(df, column_name):
-        df[column_name] = df[column_name].str.replace('?', '')
-        df[column_name] = pd.to_numeric(df[column_name], errors='coerce')
+    def clean_card_number(df):
+        df['card_number'] = df['card_number'].astype(str)
+        df['card_number'] = df['card_number'].str.replace('?', '')
+        df['card_number'] = pd.to_numeric(df['card_number'], errors='coerce')
         df = df.dropna()
         return df
 
