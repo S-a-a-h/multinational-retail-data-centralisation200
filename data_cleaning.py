@@ -37,10 +37,12 @@ class DataCleaning(DataProcessor):
         cleaned_card_df_pdates = DataProcessor.standardize_date_column(card_df_cn, 'date_payment_confirmed') 
         cleaned_card_df_edates = DataProcessor.format_expiry_dates(cleaned_card_df_pdates) 
 
-        cleaned_card_df_drop_cols = DataProcessor.drop_df_column(cleaned_card_df_edates, ['card_number expiry_date', 'Unnamed: 0']) 
+        card_df_rnull = cleaned_card_df_edates[cleaned_card_df_edates['card_number'] != 'NULL'] #  remove null
+
+        cleaned_card_df_drop_cols = DataProcessor.drop_df_column(card_df_rnull, ['card_number expiry_date', 'Unnamed: 0']) 
         cleaned_card_df_dup = cleaned_card_df_drop_cols.drop_duplicates()   
         cleaned_card_df = cleaned_card_df_dup.dropna(subset=['date_payment_confirmed'])
-        clean_card_df = cleaned_card_df.dropna(how='all')
+        clean_card_df = cleaned_card_df.dropna()
         return clean_card_df
     
     #BUSINESS STORE DF (b_store_df)

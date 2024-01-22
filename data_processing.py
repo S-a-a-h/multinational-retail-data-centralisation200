@@ -70,7 +70,7 @@ class DataProcessor:
             numeric_value = pd.to_numeric(''.join(char for char in weight if char.isdigit() or char == '.'), errors='coerce') / 1000
             return numeric_value if not pd.isna(numeric_value) else weight
         elif 'oz' in weight:
-            # Convert 'oz' to kilograms
+
             numeric_value = pd.to_numeric(''.join(char for char in weight if char.isdigit() or char == '.'), errors='coerce') * 0.0283495
             return numeric_value if not pd.isna(numeric_value) else weight
         else:
