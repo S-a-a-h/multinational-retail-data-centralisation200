@@ -29,7 +29,7 @@ class DataExtractor:
 
     def __init__(self, db_connector_instance):
         self.db_connector_instance = db_connector_instance
-        self.header = None  #change header when using api-key in main code execution (main.ipynb)
+        self.header = None #assign header when in use
         self.s3_client = boto3.client('s3')
 
 
@@ -51,7 +51,7 @@ class DataExtractor:
             df_list = tabula.read_pdf('card_details.pdf', pages='all', stream=True)
             combined_df = pd.concat(df_list, ignore_index=True)
             return combined_df
-        
+    
 
     #B_STORE_DF
     def set_api_key(self, b_store_api_key):

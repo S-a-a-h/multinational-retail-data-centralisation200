@@ -6,71 +6,83 @@ class DataCleaning(DataProcessor):
     DataCleaning Class
     -------
     This script cleans the data via the inherited class: DataProcessor.
-    The methods included are all staticmethods for code reusablity on all DataFrames created in this project.
-    All methods are named descriptively for readability and all variables are distinct for each DataFrame for debugging purposes.
+    All methods and variables are named descriptively for readability.
 
+    Methods
+    -------
+        * _clean_users_df - cleans the users data retrieved from an SQL database.
+        * _clean_card_data - cleans the card details data retrieved from a pdf link.
+        * _clean_b_store_data - cleans the business stores data retrieved from an S3 Bucket accessed via api-keys.
+        * _convert_product_weights - converts and standardizes the weight values of the products data.
+        * _clean_products_data - cleans the products data retrieved from an S3 Bucket accessed via the bucket address.
+        * _clean_orders_df - cleans the orders data retrieved from the same SQL database as the users data.
+        * _clean_sdt_df - cleans the sales date time data retrieved from an S3 Bucket accessed via the bucket url.
     '''
 
     #USERS_DF (users_df)
-    def clean_users_df(self, users_df):
-        cleaned_users_df_dup = DataProcessor.drop_duplicates(users_df) 
-        cleaned_users_df_c_code = DataProcessor.clean_users_country_code(cleaned_users_df_dup) 
-        cleaned_users_df_add = DataProcessor.clean_address(cleaned_users_df_c_code, 'address') 
-        cleaned_users_df_uuid = DataProcessor.clean_uuids(cleaned_users_df_add, ['user_uuid']) #PK
-        cleaned_users_df_dates = DataProcessor.clean_dates(cleaned_users_df_uuid, ['join_date', 'date_of_birth'])
-        cleaned_users_df = DataProcessor.fix_index(cleaned_users_df_dates, 'index')
-        return cleaned_users_df
+    def _clean_users_df(self, users_df):
+        cleaned_users_df_c_code = DataProcessor.amend_users_country_code(users_df) 
+        cleaned_users_df_add = DataProcessor.standardize_address(cleaned_users_df_c_code, 'address') 
+        cleaned_users_df_jd = DataProcessor.standardize_date_column(cleaned_users_df_add, 'join_date')
+        cleaned_users_df_dob = DataProcessor.standardize_date_column(cleaned_users_df_jd, 'date_of_birth')
+
+        cleaned_users_df_uuid = DataProcessor.filter_uuids(cleaned_users_df_dob, ['user_uuid']) #PK
+        cleaned_users_df_dup = cleaned_users_df_uuid.drop_duplicates() 
+        clean_users_df = DataProcessor.fix_index(cleaned_users_df_dup, 'index')
+        return clean_users_df
     
     #CARD_DF (card_df)
-    def clean_card_data(self, card_df): 
-        cleaned_card_df_dup = DataProcessor.drop_duplicates(card_df) 
-        cleaned_card_df_dropcols = DataProcessor.drop_df_cols(cleaned_card_df_dup, ['card_number expiry_date', 'Unnamed: 0']) 
-        cleaned_card_df_pdates = DataProcessor.clean_dates(cleaned_card_df_dropcols, ['date_payment_confirmed']) 
+    def _clean_card_data(self, card_df): 
+        card_df_cn = DataProcessor.filter_card_number(card_df) #PK
+        cleaned_card_df_pdates = DataProcessor.standardize_date_column(card_df_cn, 'date_payment_confirmed') 
         cleaned_card_df_edates = DataProcessor.format_expiry_dates(cleaned_card_df_pdates) 
-        cleaned_card_df = DataProcessor.clean_card_number(cleaned_card_df_edates) #PK
-        return cleaned_card_df
+
+        cleaned_card_df_drop_cols = DataProcessor.drop_df_column(cleaned_card_df_edates, ['card_number expiry_date', 'Unnamed: 0']) 
+        cleaned_card_df_dup = cleaned_card_df_drop_cols.drop_duplicates()   
+        cleaned_card_df = cleaned_card_df_dup.dropna(subset=['date_payment_confirmed'])
+        clean_card_df = cleaned_card_df.dropna(how='all')
+        return clean_card_df
     
     #BUSINESS STORE DF (b_store_df)
-    def clean_store_data(self, b_store_df): 
-        cleaned_b_store_df_dup = DataProcessor.drop_duplicates(b_store_df) 
-        cleaned_b_store_df_con = DataProcessor.clean_store_continent(cleaned_b_store_df_dup) 
-        cleaned_b_store_df_s_c = DataProcessor.clean_store_code(cleaned_b_store_df_con) #PK
-        cleaned_b_store_df_drop = DataProcessor.drop_df_cols(cleaned_b_store_df_s_c, ['lat']) 
-        cleaned_b_store_df_num = DataProcessor.tonumeric(cleaned_b_store_df_drop, ['longitude', 'staff_numbers', 'latitude']) 
-        cleaned_b_store_df_add = DataProcessor.clean_address(cleaned_b_store_df_num, 'address') 
-        cleaned_b_store_df_odate = DataProcessor.clean_dates(cleaned_b_store_df_add, ['opening_date']) 
-        cleaned_b_store_df = DataProcessor.fix_index(cleaned_b_store_df_odate, 'index') 
-        return cleaned_b_store_df
+    def _clean_b_store_data(self, b_store_df): 
+        cleaned_b_store_df_con = DataProcessor.amend_store_continent(b_store_df) 
+        cleaned_b_store_df_num = DataProcessor.convert_to_numeric(cleaned_b_store_df_con, ['longitude', 'staff_numbers', 'latitude']) 
+        cleaned_b_store_df_add = DataProcessor.standardize_address(cleaned_b_store_df_num, 'address') 
+        cleaned_b_store_df_odate = DataProcessor.standardize_date_column(cleaned_b_store_df_add, 'opening_date') 
+        
+        cleaned_b_store_df_s_c = DataProcessor.filter_store_code(cleaned_b_store_df_odate) #PK
+        cleaned_b_store_df_drop = DataProcessor.drop_df_column(cleaned_b_store_df_s_c, ['lat']) 
+        cleaned_b_store_df_dup = cleaned_b_store_df_drop.drop_duplicates()         
+        clean_b_store_df = DataProcessor.fix_index(cleaned_b_store_df_dup, 'index') 
+        return clean_b_store_df
     
     #PRODUCTS DF (prods_df)
-    def convert_product_weights(self, prods_df):
+    def _convert_product_weights(self, prods_df):
         prods_df = DataProcessor.process_prod_weight(prods_df) 
         return prods_df
     
-    def clean_products_data(self, prods_df):
-        cleaned_prods_df_dup = DataProcessor.drop_duplicates(prods_df) 
-        cleaned_prods_df_col_n = DataProcessor.clean_col_names(cleaned_prods_df_dup) 
-        cleaned_prods_df_pc = DataProcessor.clean_prod_code(cleaned_prods_df_col_n) #PK
-        cleaned_prods_df_date = DataProcessor.clean_dates(cleaned_prods_df_pc, ['date_added']) 
-        cleaned_prods_df = DataProcessor.fix_index(cleaned_prods_df_date, 'index') 
-        return cleaned_prods_df
+    def _clean_products_data(self, prods_df):
+        cleaned_prods_df_col_n = DataProcessor.change_column_names(prods_df) 
+        cleaned_prods_df_date = DataProcessor.standardize_date_column(cleaned_prods_df_col_n, 'date_added') 
+        
+        cleaned_prods_df_pc = DataProcessor.filter_product_code(cleaned_prods_df_date) #PK
+        cleaned_prods_df_dup = cleaned_prods_df_pc.drop_duplicates() 
+        cleaned_prods_df_dropna = cleaned_prods_df_dup.dropna(subset=['product_code'])
+        clean_prods_df = DataProcessor.fix_index(cleaned_prods_df_dropna, 'index') 
+        return clean_prods_df
 
     #ORDERS_DF (orders_df)
-    def clean_orders_df(self, orders_df):
-        cleaned_orders_df_dup = DataProcessor.drop_duplicates(orders_df) 
-        cleaned_orders_df_drop_cols = DataProcessor.drop_df_cols(cleaned_orders_df_dup, ['level_0', 'first_name', 'last_name', '1']) 
-        cleaned_orders_df_uuids = DataProcessor.clean_uuids(cleaned_orders_df_drop_cols, ['date_uuid', 'user_uuid']) #FK
-        cleaned_orders_df_cnum = DataProcessor.clean_card_number(cleaned_orders_df_uuids) #FK
-        cleaned_orders_df_sc = DataProcessor.clean_store_code(cleaned_orders_df_cnum) #FK
-        cleaned_orders_df_pc = DataProcessor.clean_prod_code(cleaned_orders_df_sc) #FK
-        cleaned_orders_df = DataProcessor.fix_index(cleaned_orders_df_pc, 'index') #FK
-        return cleaned_orders_df
+    def _clean_orders_df(self, orders_df):
+        cleaned_orders_df_drop_cols = DataProcessor.drop_df_column(orders_df, ['level_0', 'first_name', 'last_name', '1']) 
+        cleaned_orders_df_dup = cleaned_orders_df_drop_cols.drop_duplicates()
+        clean_orders_df = DataProcessor.fix_index(cleaned_orders_df_dup, 'index')
+        return clean_orders_df
 
     #SALES DATE TIMES (sdt_df)
-    def clean_sdt_df(self, sdt_df):
-        cleaned_sdt_df_dup = DataProcessor.drop_duplicates(sdt_df) 
-        cleaned_sdt_df_time = DataProcessor.clean_timestamp(cleaned_sdt_df_dup) 
-        cleaned_sdt_df = DataProcessor.clean_uuids(cleaned_sdt_df_time, ['date_uuid']) #PK
-        return cleaned_sdt_df
+    def _clean_sdt_df(self, sdt_df):
+        cleaned_sdt_df_time = DataProcessor.standardize_timestamp(sdt_df) 
+        cleaned_sdt_df_uuid = DataProcessor.filter_uuids(cleaned_sdt_df_time, ['date_uuid']) #PK
+        clean_sdt_df = cleaned_sdt_df_uuid.drop_duplicates() 
+        return clean_sdt_df
         
 
