@@ -28,17 +28,10 @@ class DataProcessor:
         card_df['card_number'] = card_df['card_number'].str.replace('?', '')
         card_df['card_number'] = card_df['card_number'].str.replace('.', '')
         card_df['card_number'] = card_df['card_number'].str.replace(r'\.0$', '')
-    
-        #card_df['card_number'] = card_df['card_number'].astype(str)
-        #card_df['card_number'] = card_df['card_number'].apply(lambda x: re.sub(r'\D', '', str(x)))
         return card_df
 
     def format_expiry_dates(card_df):
-        if 'expiry_date' in card_df.columns:
-            try:
-                card_df['expiry_date'] = pd.to_datetime(card_df['expiry_date'], format='%m-%d')
-            except ValueError:
-                card_df['expiry_date'] = card_df['expiry_date'] 
+        card_df['expiry_date'] = card_df['expiry_date'].apply(lambda x: pd.to_datetime(x, format='%m/%y', errors='coerce')).dt.date 
         return card_df
 
 

@@ -4,6 +4,9 @@ import json
 import pandas as pd
 import requests
 import tabula
+import urllib.request
+from io import BytesIO
+
 
 
 class DataExtractor:
@@ -16,15 +19,15 @@ class DataExtractor:
 
     Methods
     -------
-        * __init__ - a magic method which uses an instance of class DatabaseConnecter and initializes it, applies the header attribute for api-key use and utilizes the aws cli
-        * read_rds_table - a public method to read in tables from a relational database using the engine created in class DatabaseConnector
-        * _retrieve_pdf_data - a private method which retrieves the card data from a pdf link and is coded to bypass an SSLCertification Error by instead downloading the file from the pdf_link and assigning a cacert.pem file to overcome the error. 
-        * set_api_key - a public method which alters the header attribute by assigning the api-keys
-        * list_number_of_stores - a public method that returns the number of stores as an interger
-        * retrieve_stores_data - a public method that retrieves the data, sorts it and returns a single pandas DataFrame
-        * extract_store_data - a public method that organizes the columns of the DataFrame returned by retrieve_stores_data
-        * extract_from_s3 - a public method that extracts data from an Amazon S3 Bucket via the bucket address
-        * extract_sdt - a public method that extracts data from an S3 Bucket using the link to the Amazon S3 Bucket
+        * __init__ - a magic method which uses an instance of class DatabaseConnecter and initializes it, applies the header attribute for api-key use and utilizes the aws cli.
+        * read_rds_table - a public method to read in tables from a relational database using the engine created in class DatabaseConnector.
+        * retrieve_pdf_data - a public method which retrieves the card data from a pdf url and is coded to retrieve the data in bytes format incase of any data corruption. 
+        * set_api_key - a public method which alters the header attribute by assigning the api-keys.
+        * list_number_of_stores - a public method that returns the number of stores as an interger.
+        * retrieve_stores_data - a public method that retrieves the data, sorts it and returns a single pandas DataFrame.
+        * extract_store_data - a public method that organizes the columns of the DataFrame returned by retrieve_stores_data.
+        * extract_from_s3 - a public method that extracts data from an Amazon S3 Bucket via the bucket address.
+        * extract_sdt - a public method that extracts data from an S3 Bucket using the link to the Amazon S3 Bucket.
     '''
 
     def __init__(self, db_connector_instance):
@@ -42,15 +45,13 @@ class DataExtractor:
 
 
     #CARD_DF
-    def _retrieve_pdf_data(self, pdf_link):
-        custom_cert_path = '/Applications/IBM/SPSS/Statistics/24/Python3/lib/python3.4/site-packages/pip/_vendor/certifi/cacert.pem'
-        response = requests.get(pdf_link, verify=custom_cert_path)
-        if response.status_code == 200:
-            with open('card_details.pdf', 'wb') as cd:
-                cd.write(response.content)
-            df_list = tabula.read_pdf('card_details.pdf', pages='all', stream=True)
-            combined_df = pd.concat(df_list, ignore_index=True)
-            return combined_df
+    def retrieve_pdf_data(self):
+        pdf_url = "https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf"
+        response = requests.get(pdf_url)
+        response.raise_for_status()
+        df_list = tabula.read_pdf(BytesIO(response.content), pages='all')
+        df = pd.concat(df_list)
+        return df 
     
 
     #B_STORE_DF
