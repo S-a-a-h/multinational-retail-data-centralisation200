@@ -12,6 +12,7 @@
    - data_processing.py
    - data_cleaning.py
    - main.ipynb
+   - MRDC QUERIES.sql
 1. License Information
    
 ### Project Description
@@ -72,6 +73,11 @@ This class inherits from DataProcessor and applies all cleaning methods to the r
 #### main.ipynb
 
 This file extracts, cleans and uploads each DataFrame to sales_data.
+
+#### MRDC QUERIES.sql
+
+This file contains all queries applied to the data which are ready to run. 
+Note: some comments clarify the query's purpose. 
 
 
 
