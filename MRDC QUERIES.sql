@@ -1,16 +1,131 @@
+ALTER TABLE orders_table 
+	ALTER COLUMN date_uuid TYPE UUID USING date_uuid::UUID,
+	ALTER COLUMN user_uuid TYPE UUID USING user_uuid::UUID,
+	ALTER COLUMN card_number TYPE VARCHAR(19),
+	ALTER COLUMN store_code TYPE VARCHAR(12),
+	ALTER COLUMN product_code TYPE VARCHAR(11),
+	ALTER COLUMN product_quantity TYPE SMALLINT;
+
+
+ALTER TABLE dim_users 
+	ALTER COLUMN first_name TYPE VARCHAR(255),
+	ALTER COLUMN last_name TYPE VARCHAR(255),
+	ALTER COLUMN date_of_birth TYPE DATE USING date_of_birth::date,
+	ALTER COLUMN country_code TYPE VARCHAR(2),
+	ALTER COLUMN user_uuid TYPE UUID USING user_uuid::UUID,
+	ALTER COLUMN join_date TYPE DATE USING join_date::date;
+
+
+ALTER TABLE dim_store_details 
+	ALTER COLUMN longitude TYPE FLOAT,
+	ALTER COLUMN locality TYPE VARCHAR(255),
+	ALTER COLUMN store_code TYPE VARCHAR(12),
+	ALTER COLUMN staff_numbers TYPE SMALLINT,
+	ALTER COLUMN opening_date TYPE DATE USING opening_date::date,
+	ALTER COLUMN store_type TYPE VARCHAR(255), 
+	ALTER COLUMN latitude TYPE FLOAT,
+	ALTER COLUMN country_code TYPE VARCHAR(2),
+	ALTER COLUMN continent TYPE VARCHAR(255);
+	
+	
+UPDATE dim_store_details
+SET locality = COALESCE(locality, 'N/A');
+
+
+UPDATE dim_products
+SET product_price = REPLACE(product_price, '£', '');
+
+
+ALTER TABLE dim_products
+	ADD COLUMN weight_class VARCHAR(14);
+
+
+UPDATE dim_products
+SET weight_class = 
+    CASE 
+        WHEN CAST("weight(kg)" AS numeric) < 2 THEN 'Light'
+        WHEN CAST("weight(kg)" AS numeric) >= 2 AND CAST("weight(kg)" AS numeric) < 40 THEN 'Mid_Sized'
+        WHEN CAST("weight(kg)" AS numeric) >= 40 AND CAST("weight(kg)" AS numeric) < 140 THEN 'Heavy'
+        WHEN CAST("weight(kg)" AS numeric) >= 140 THEN 'Truck_Required'
+    END;
+
+
+ALTER TABLE dim_products 
+RENAME COLUMN product_status TO still_available;
+
+
+UPDATE dim_products
+SET still_available = 
+CASE 
+	WHEN still_available = 'Still_avaliable' THEN true
+    ELSE false
+END;
+
+
+ALTER TABLE dim_products 
+	ALTER COLUMN product_price TYPE FLOAT USING product_price::double precision,
+	ALTER COLUMN "weight(kg)" TYPE FLOAT USING "weight(kg)"::double precision,
+	ALTER COLUMN "EAN" TYPE VARCHAR(17),
+	ALTER COLUMN product_code TYPE VARCHAR(11),
+	ALTER COLUMN date_added TYPE DATE USING date_added::DATE,
+	ALTER COLUMN "uuid" TYPE UUID USING uuid::UUID,
+	ALTER COLUMN still_available TYPE BOOLEAN USING still_available::boolean,
+	ALTER COLUMN weight_class TYPE VARCHAR(14);
+
+
+ALTER TABLE dim_date_times
+	ALTER COLUMN "month" TYPE VARCHAR(2),
+	ALTER COLUMN "year" TYPE VARCHAR(4),
+	ALTER COLUMN "day" TYPE VARCHAR(2),
+	ALTER COLUMN time_period TYPE VARCHAR(10),
+	ALTER COLUMN date_uuid TYPE UUID USING date_uuid::UUID;
+
+
+ALTER TABLE dim_card_details
+	ALTER COLUMN card_number TYPE VARCHAR(50),
+	ALTER COLUMN expiry_date TYPE VARCHAR(20),
+	ALTER COLUMN date_payment_confirmed TYPE DATE USING date_payment_confirmed::date;
+
+
+ALTER TABLE dim_date_times 
+ADD PRIMARY KEY(date_uuid); 
+
+ALTER TABLE dim_products 
+ADD PRIMARY KEY(product_code); 
+
+ALTER TABLE dim_store_details 
+ADD PRIMARY KEY(store_code); 
+
+ALTER TABLE dim_users 
+ADD PRIMARY KEY(user_uuid); 
+
+ALTER TABLE dim_card_details 
+ADD PRIMARY KEY(card_number);
+
+
+ALTER TABLE orders_table
+  ADD CONSTRAINT fk_orders_date_times 
+  	FOREIGN KEY (date_uuid) 
+		REFERENCES dim_date_times(date_uuid),	
+  ADD CONSTRAINT fk_orders_store_details 
+  	FOREIGN KEY (store_code) 
+		REFERENCES dim_store_details(store_code),	
+  ADD CONSTRAINT fk_orders_users 
+  	FOREIGN KEY (user_uuid) 
+		REFERENCES dim_users(user_uuid),
+  ADD CONSTRAINT fk_orders_products 
+  	FOREIGN KEY (product_code) 
+		REFERENCES dim_products(product_code),
+  ADD CONSTRAINT fk_orders_card_details 
+  	FOREIGN KEY (card_number) 
+		REFERENCES dim_card_details(card_number);
+
 SELECT country_code, 
 COUNT (*) AS Number
 FROM dim_store_details
 GROUP BY country_code
 ORDER BY country_code
 LIMIT 7;
-
-"DE"	141
-"GB"	266
-"US"	34
-
-
--------
 
 
 SELECT locality, 
@@ -19,17 +134,6 @@ FROM dim_store_details
 GROUP BY locality
 ORDER BY Number DESC
 LIMIT 7;
-
-"Chapletown"	14
-"Belper"	13
-"Bushey"	12
-"Exeter"	11
-"Arbroath"	10
-"High Wycombe"	10
-"Rutherglen"	10
-
-
--------
 
 
 SELECT 
@@ -51,16 +155,6 @@ ORDER BY
     total_sales DESC
 LIMIT 6;
 
-"8"	673295.68
-"1"	668041.45
-"10"	657335.84
-"5"	650321.43
-"7"	645741.70
-"3"	645463.00
-
-
--------
-
 
 SELECT 
 	COUNT(*) AS number_of_sales,
@@ -75,12 +169,6 @@ FROM
 GROUP BY 
     store_category;
 
-93166	374047	"Offline"
-26957	107739	"Web"
-
-
--------
-
 
 SELECT 
 	COUNT(*) AS number_of_sales,
@@ -94,12 +182,6 @@ FROM
     orders_table
 GROUP BY 
     store_category;
-
-93166	374047	"Offline"
-26957	107739	"Web"
-
-
--------
 
 
 SELECT * FROM dim_store_details; --store_type
@@ -125,15 +207,6 @@ GROUP BY
     dim_store_details.store_type
 ORDER BY 
     total_sales DESC;
-	
-"Local"			3440896.52	44.56
-"Web Portal"	1726547.05	22.36
-"Super Store"	1224293.65	15.85
-"Mall Kiosk"	698791.61	9.05
-"Outlet"		631804.81	8.18
-
-
--------
 
 
 SELECT "year", "month" 
@@ -158,20 +231,6 @@ ORDER BY
     total_sales DESC
 LIMIT 10;
 
-"1994"	"3"		27936.77
-"2019"	"1"		27356.14
-"2009"	"8"		27091.67
-"1997"	"11"	26679.98
-"2018"	"12"	26310.97
-"2019"	"8"		26277.72
-"2017"	"9"		26236.67
-"2010"	"5"		25798.12
-"1996"	"8"		25648.29
-"2000"	"1"		25614.54
-
-
--------
-
 
 SELECT 
 	country_code, 
@@ -180,13 +239,6 @@ FROM
 	dim_store_details
 GROUP BY 
 	country_code;
-
-"US"	1304
-"GB"	13132
-"DE"	6054
-
-
--------
 
 
 SELECT 
@@ -206,14 +258,6 @@ GROUP BY
 	dim_store_details.country_code
 ORDER BY 
     total_sales;
-
-"DE"	"Outlet"		198373.57
-"DE"	"Mall Kiosk"	247634.20
-"DE"	"Super Store"	384625.03
-"DE"	"Local"			1109909.59
-
-
--------
 
 
 --specified years:
